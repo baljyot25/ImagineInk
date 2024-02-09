@@ -17,10 +17,16 @@ USE `mydb` ;
 -- -----------------------------------------------------
 -- Table `mydb`.`user`
 -- -----------------------------------------------------
+
+-- need to confirm about relationship between and admin.
+
 CREATE TABLE IF NOT EXISTS `mydb`.`user` (
   `user_id` INT NOT NULL AUTO_INCREMENT,
   `email_id` VARCHAR(45) NOT NULL,
   `password` VARCHAR(45) NOT NULL,
+  `username` VARCHAR(45) NOT NULL,
+  `address` VARCHAR(85) NOT NULL,
+  `account_status` VARCHAR(25) NOT NULL, -- deleted/logged in /logged out....
   `full_name` VARCHAR(45) NOT NULL,
   `registration_date` DATE NOT NULL DEFAULT (CURRENT_DATE),
   `last_login_date` DATE NOT NULL DEFAULT (CURRENT_DATE),
@@ -30,12 +36,13 @@ CREATE TABLE IF NOT EXISTS `mydb`.`user` (
 ENGINE = InnoDB;
 
 
+
 -- -----------------------------------------------------
 -- Table `mydb`.`customer`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `mydb`.`customer` (
   `customer_user_id` INT NOT NULL AUTO_INCREMENT,
-  `address` VARCHAR(45) NULL,
+  `shipping_address` VARCHAR(45) NULL,
   `payment_information` VARCHAR(45) NULL,
   INDEX `user_id_idx` (`customer_user_id` ASC) VISIBLE,
   PRIMARY KEY (`customer_user_id`),
@@ -103,14 +110,17 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 -- Table `mydb`.`design_tags`
 -- -----------------------------------------------------
+
+-- need to verify the need of artist id here .
+ 
 CREATE TABLE IF NOT EXISTS `mydb`.`design_tags` (
   `design_tag_id` INT NOT NULL,
   `design_id` INT NOT NULL,
-  `artist_id` INT NOT NULL,
+  -- `artist_id` INT NOT NULL; 
   INDEX `design_id_idx` (`design_id` ASC) VISIBLE,
   INDEX `tag_id_idx` (`design_tag_id` ASC) VISIBLE,
-  INDEX `artist_id_idx` (`artist_id` ASC) VISIBLE,
-  PRIMARY KEY (`design_tag_id`, `design_id`, `artist_id`),
+  -- INDEX `artist_id_idx` (`artist_id` ASC) VISIBLE,
+  PRIMARY KEY (`design_tag_id`, `design_id`),-- , `artist_id`),
   CONSTRAINT `design_id`
     FOREIGN KEY (`design_id`)
     REFERENCES `mydb`.`design` (`design_id`)
@@ -120,12 +130,12 @@ CREATE TABLE IF NOT EXISTS `mydb`.`design_tags` (
     FOREIGN KEY (`design_tag_id`)
     REFERENCES `mydb`.`tags` (`tag_id`)
     ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `artist_id`
-    FOREIGN KEY (`artist_id`)
-    REFERENCES `mydb`.`design` (`designer_artist_id`)
-    ON DELETE NO ACTION
     ON UPDATE NO ACTION)
+  -- CONSTRAINT `artist_id`
+--     FOREIGN KEY (`artist_id`)
+--     REFERENCES `mydb`.`design` (`designer_artist_id`)
+--     ON DELETE NO ACTION
+--     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 
@@ -166,7 +176,7 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `mydb`.`shopping_cart` (
   `cart_id` INT NOT NULL AUTO_INCREMENT,
-  `user_id` INT NOT NULL,
+  -- `user_id` INT NOT NULL,
   `grand_total` INT ZEROFILL NULL,
   `total_items` INT ZEROFILL NULL,
   PRIMARY KEY (`cart_id`))
@@ -176,6 +186,7 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 -- Table `mydb`.`product`
 -- -----------------------------------------------------
+
 CREATE TABLE IF NOT EXISTS `mydb`.`product` (
   `product_id` INT NOT NULL AUTO_INCREMENT,
   `title` VARCHAR(45) NOT NULL,
@@ -241,13 +252,16 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 -- Table `mydb`.`report`
 -- -----------------------------------------------------
+
+
+
 CREATE TABLE IF NOT EXISTS `mydb`.`report` (
-  `report_id` INT NOT NULL AUTO_INCREMENT,
+ --  `report_id` INT NOT NULL AUTO_INCREMENT,
   `report_date` VARCHAR(45) NOT NULL,
   `report_description` VARCHAR(45) NOT NULL,
   `reporter_user_id` INT NOT NULL,
   `reported_design_id` INT NOT NULL,
-  PRIMARY KEY (`report_id`),
+  PRIMARY KEY (`reported_design_id` ,`reporter_user_id` ),
   INDEX `reporter_user_id_idx` (`reporter_user_id` ASC) VISIBLE,
   INDEX `reported_design_id_idx` (`reported_design_id` ASC) VISIBLE,
   CONSTRAINT `reporter_user_id`
@@ -272,6 +286,8 @@ CREATE TABLE IF NOT EXISTS `mydb`.`admin` (
   `password` VARCHAR(45) NOT NULL,
   PRIMARY KEY (`admin_id`))
 ENGINE = InnoDB;
+
+
 
 
 -- -----------------------------------------------------

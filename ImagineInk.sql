@@ -186,7 +186,7 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 -- Table `mydb`.`product`
 -- -----------------------------------------------------
-
+-- whatever customer selects go into the cart items , so no need to have an seperate entity
 CREATE TABLE IF NOT EXISTS `mydb`.`product` (
   `product_id` INT NOT NULL AUTO_INCREMENT,
   `title` VARCHAR(45) NOT NULL,

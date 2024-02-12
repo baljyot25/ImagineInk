@@ -1,4 +1,8 @@
--- MySQL Workbench Forward Engineering 
+-- Contributions:
+-- Saurav Mehra: Creating schema and data population
+-- Baljyot Singh Modi: Creating schema and data population
+-- Kushagra Gupta: Creating schema and data population
+-- Mudit Bansal: Creating schema and data population
 
 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;

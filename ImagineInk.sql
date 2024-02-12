@@ -372,13 +372,6 @@ CREATE TABLE IF NOT EXISTS `mydb`.`relates_to` (
 ENGINE = InnoDB;
 
 
--- -----------------------------------------------------
--- Table `mydb`.`manage_designs`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `mydb`.`manage_designs` (
-  `managing_admin_id` INT NOT NULL,
-  PRIMARY KEY (`managing_admin_id`))
-ENGINE = InnoDB;
 
 -- -----------------------------------------------------
 -- Populating `mydb`.`user`
@@ -640,6 +633,14 @@ INSERT INTO `mydb`.`relates_to` (`related_review_id`, `related_design_id`) VALUE
 (8, 8),
 (9, 9),
 (10, 10);
+
+--Populate admin table
+INSERT INTO `mydb`.`admin` (`username`, `password`) VALUES 
+('admin1', 'admin123'),
+('admin2', 'admin111'),
+('admin3', 'admin012'),
+('admin4', 'admin123456'),
+('admin5', 'admin98765');
 
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;

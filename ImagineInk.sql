@@ -35,7 +35,6 @@ CREATE TABLE IF NOT EXISTS ImaginInk.user (
   UNIQUE KEY unique_email_account_type (email_id, account_type),
   CONSTRAINT chk_email_format CHECK (email_id LIKE '_%@_%.com')
 );	
-select * from user;
 -- -----------------------------------------------------
 -- Table ImaginInk.customer
 -- -----------------------------------------------------

@@ -31,8 +31,10 @@ CREATE TABLE IF NOT EXISTS ImaginInk.user (
   last_login_date DATE NOT NULL DEFAULT (CURRENT_DATE),
   account_type ENUM('customer', 'artist') NOT NULL,
   payment_method ENUM('Credit Card', 'PayTM', 'Google Pay', 'Bank Transfer'),
-  PRIMARY KEY (user_id)
-);
+  PRIMARY KEY (user_id),
+  UNIQUE KEY unique_email_account_type (email_id, account_type),
+  CONSTRAINT chk_email_format CHECK (email_id LIKE '_%@_%.com')
+);	
 
 -- -----------------------------------------------------
 -- Table ImaginInk.customer

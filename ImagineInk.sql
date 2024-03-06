@@ -25,9 +25,9 @@ CREATE TABLE IF NOT EXISTS ImaginInk.user (
   email_id VARCHAR(45) NOT NULL,
   password VARCHAR(45) NOT NULL,
   username VARCHAR(45) NOT NULL,
-  account_status ENUM('logged_in', 'logged_out') NOT NULL,
+  account_status ENUM('logged_in', 'logged_out','deleted' ) NOT NULL,
   full_name VARCHAR(45) NOT NULL,
-  registration_date DATE NOT NULL DEFAULT (CURRENT_DATE),
+  registration_date DATE NOT NULL DEFAULT (CURRENT_DATE),	
   last_login_date DATE NOT NULL DEFAULT (CURRENT_DATE),
   account_type ENUM('customer', 'artist') NOT NULL,
   payment_method ENUM('Credit Card', 'PayTM', 'Google Pay', 'Bank Transfer'),
@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS ImaginInk.user (
   UNIQUE KEY unique_email_account_type (email_id, account_type),
   CONSTRAINT chk_email_format CHECK (email_id LIKE '_%@_%.com')
 );	
-
+select * from user;
 -- -----------------------------------------------------
 -- Table ImaginInk.customer
 -- -----------------------------------------------------
@@ -68,6 +68,7 @@ CREATE TABLE ImaginInk.design (
   price INT NOT NULL,
   sales_count INT DEFAULT 0,
   views_count INT DEFAULT 0,
+  status ENUM('deleted','visible','hidden') NOT NULL default 'visible',
   PRIMARY KEY (design_id),
   FOREIGN KEY (artist_id) REFERENCES ImaginInk.artist (artist_id),
   CONSTRAINT chk_design_price CHECK (price > 0)
@@ -92,8 +93,10 @@ CREATE TABLE ImaginInk.design_tags (
   design_id INT NOT NULL,
   PRIMARY KEY (tag_id, design_id),
   FOREIGN KEY (design_id) REFERENCES ImaginInk.design (design_id),
-  FOREIGN KEY (tag_id) REFERENCES ImaginInk.tag (tag_id)
-);
+  FOREIGN KEY (tag_id) REFERENCES ImaginInk.tag (tag_id) 
+  ON DELETE CASCADE
+  ON UPDATE CASCADE
+  );
 
 -- -----------------------------------------------------
 -- Table ImaginInk.artist_assist
@@ -157,6 +160,8 @@ CREATE TABLE ImaginInk.cart_items (
   FOREIGN KEY (product_id) REFERENCES ImaginInk.product (product_id),
   FOREIGN KEY (design_id) REFERENCES ImaginInk.design (design_id),
   FOREIGN KEY (cart_id) REFERENCES ImaginInk.shopping_cart (cart_id)
+  ON DELETE CASCADE
+  ON UPDATE CASCADE
 );
 
 -- -----------------------------------------------------
@@ -234,8 +239,11 @@ CREATE TABLE ImaginInk.review_relates_to (
   review_id INT NOT NULL,
   design_id INT NOT NULL,
   PRIMARY KEY (review_id, design_id),
-  FOREIGN KEY (review_id) REFERENCES ImaginInk.review (review_id),
+  FOREIGN KEY (review_id) REFERENCES ImaginInk.review (review_id)
+  ON DELETE CASCADE  
+  ON UPDATE CASCADE,
   FOREIGN KEY (design_id) REFERENCES ImaginInk.design (design_id)
+  
 );
 
 -- -----------------------------------------------------

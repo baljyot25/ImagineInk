@@ -97,14 +97,19 @@ ORDER BY
 	total_sales DESC
 LIMIT 1;
 
--- 7. Selecting popular tags
+-- 7. Selecting designs with their respective tags
 SELECT
-	tag_name,
-    usage_count
+	d.design_id,
+    d.title,
+    t.tag_name
 FROM
-	tag
+	design d
+JOIN
+	design_tags dt ON d.design_id = dt.design_id
+JOIN
+	tag t ON dt.tag_id = t.tag_id
 ORDER BY
-	usage_count DESC;
+	d.design_id ASC;
     
 -- 8. Selecting most reviewed designs
 SELECT
@@ -122,27 +127,52 @@ GROUP BY
 ORDER BY
 	reviews DESC;
     
+SELECT * FROM ImaginInk.order;
+
+-- 9. Updating orders' delivery status where the delivery address is in Gandhi Lane
+UPDATE 
+	ImaginInk.order o
+JOIN 
+	ImaginInk.view_history vh ON o.order_id = vh.order_id
+JOIN 
+	ImaginInk.customer c ON vh.customer_id = c.customer_id
+SET 
+	o.delivery_status = 
+		CASE
+			WHEN o.delivery_status = 'pending' THEN 'shipped'
+			ELSE 'delivered'
+		END
+WHERE
+	c.address LIKE '%gandhi lane%';
     
+-- 10. Delete designs with their corresponding reviews that have been reported as containing hateful content
+DELETE 
+	design, 
+	review
+FROM
+	design
+JOIN 
+	report r ON design.design_id = r.reported_design_id
+JOIN 
+	review_relates_to rrt ON design.design_id = rrt.design_id
+JOIN 
+	review ON rrt.review_id = review.review_id
+WHERE 
+	r.report_description = 'Hateful content';
     
--- showcasing constraints
+-- Showcasing Constraints
 INSERT INTO ImaginInk.user (email_id, password, username, account_status, full_name, registration_date, last_login_date, account_type, payment_method) VALUES
-('saurabh@example.com', 'password321', 'saurabh_mishra', 'logged_out', 'Saurabh Mishra', '2024-02-01', '2024-02-02', 'customer', 'Credit Card'); -- not valid
-INSERT INTO ImaginInk.user (email_id, password, username, account_status, full_name, registration_date, last_login_date, account_type, payment_method) VALUES
-('saurabh@example.com', 'password321', 'saurabh_mishra', 'logged_out', 'Saurabh Mishra', '2024-02-01', '2024-02-02', 'artist', 'Credit Card');-- valid
-
-INSERT INTO ImaginInk.user (email_id, password, username, account_status, full_name, registration_date, last_login_date, account_type, payment_method) VALUES
-('birexample.com', 'password321', 'Harsha_mehtani', 'logged_out', 'Harsha Mehtani', '2024-02-01', '2024-02-02', 'customer', 'PayTM'); -- not valid
+-- Invalid query as saurabh@example.com has already been used as an email for a customer
+('saurabh@example.com', 'password321', 'saurabh_mishra', 'logged_out', 'Saurabh Mishra', '2024-02-01', '2024-02-02', 'customer', 'Credit Card');
 
 INSERT INTO ImaginInk.user (email_id, password, username, account_status, full_name, registration_date, last_login_date, account_type, payment_method) VALUES
-('birexample@.com', 'password321', 'Harsha_mehtani', 'logged_out', 'Harsha Mehtani', '2024-02-01', '2024-02-02', 'customer', 'PayTM'); -- not valid
+-- Valid query as saurabh@example.com has not been used before as an email for an artist
+('saurabh@example.com', 'password321', 'saurabh_mishra', 'logged_out', 'Saurabh Mishra', '2024-02-01', '2024-02-02', 'artist', 'Credit Card');
 
 INSERT INTO ImaginInk.user (email_id, password, username, account_status, full_name, registration_date, last_login_date, account_type, payment_method) VALUES
-('bir@example.com', 'password321', 'Harsha_mehtani', 'logged_out', 'Harsha Mehtani', '2024-02-01', '2024-02-02', 'customer', 'PayTM'); --  valid
+-- Invalid email
+('birexample.com', 'password321', 'Harsha_mehtani', 'logged_out', 'Harsha Mehtani', '2024-02-01', '2024-02-02', 'customer', 'PayTM');
 
-INSERT INTO ImaginInk.product (title, image, price, sales_count, dimensions) VALUES
-('Hoodie', 'Hoodie.jpg', 50, 10, 'set of 6');-- not valid
-
-INSERT INTO ImaginInk.product (title, image, price, sales_count, dimensions) VALUES
-('Hoodie', 'Hoodie.jpg', 50, 10, 'set of 4');-- valid	
-
-
+INSERT INTO ImaginInk.design(artist_id, title, description, image, creation_date, price, sales_count, views_count) VALUES
+-- Invalid price
+(2, 'abc', 'def', 'image2.jpg', '2024-01-01', -1, 0, 100);

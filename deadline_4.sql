@@ -126,8 +126,6 @@ GROUP BY
 	d.design_id, d.title
 ORDER BY
 	reviews DESC;
-    
-SELECT * FROM ImaginInk.order;
 
 -- 9. Updating orders' delivery status where the delivery address is in Gandhi Lane
 UPDATE 

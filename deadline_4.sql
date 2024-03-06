@@ -121,4 +121,28 @@ GROUP BY
 	d.design_id, d.title
 ORDER BY
 	reviews DESC;
-	
+    
+    
+    
+-- showcasing constraints
+INSERT INTO ImaginInk.user (email_id, password, username, account_status, full_name, registration_date, last_login_date, account_type, payment_method) VALUES
+('saurabh@example.com', 'password321', 'saurabh_mishra', 'logged_out', 'Saurabh Mishra', '2024-02-01', '2024-02-02', 'customer', 'Credit Card'); -- not valid
+INSERT INTO ImaginInk.user (email_id, password, username, account_status, full_name, registration_date, last_login_date, account_type, payment_method) VALUES
+('saurabh@example.com', 'password321', 'saurabh_mishra', 'logged_out', 'Saurabh Mishra', '2024-02-01', '2024-02-02', 'artist', 'Credit Card');-- valid
+
+INSERT INTO ImaginInk.user (email_id, password, username, account_status, full_name, registration_date, last_login_date, account_type, payment_method) VALUES
+('birexample.com', 'password321', 'Harsha_mehtani', 'logged_out', 'Harsha Mehtani', '2024-02-01', '2024-02-02', 'customer', 'PayTM'); -- not valid
+
+INSERT INTO ImaginInk.user (email_id, password, username, account_status, full_name, registration_date, last_login_date, account_type, payment_method) VALUES
+('birexample@.com', 'password321', 'Harsha_mehtani', 'logged_out', 'Harsha Mehtani', '2024-02-01', '2024-02-02', 'customer', 'PayTM'); -- not valid
+
+INSERT INTO ImaginInk.user (email_id, password, username, account_status, full_name, registration_date, last_login_date, account_type, payment_method) VALUES
+('bir@example.com', 'password321', 'Harsha_mehtani', 'logged_out', 'Harsha Mehtani', '2024-02-01', '2024-02-02', 'customer', 'PayTM'); --  valid
+
+INSERT INTO ImaginInk.product (title, image, price, sales_count, dimensions) VALUES
+('Hoodie', 'Hoodie.jpg', 50, 10, 'set of 6');-- not valid
+
+INSERT INTO ImaginInk.product (title, image, price, sales_count, dimensions) VALUES
+('Hoodie', 'Hoodie.jpg', 50, 10, 'set of 4');-- valid	
+
+

@@ -15,11 +15,11 @@ GROUP BY
     a.artist_id
 ORDER BY
     total_revenue DESC;
-    
--- 2. Display all users who have reported a particular artist
+
+-- 2. Display all users who have reported a particular artist along with design name
 SELECT DISTINCT
 	u.username, 
-    a.username AS artist_name
+    a.username AS artist_name, d.title as title
 FROM 
 	user u
 JOIN 
@@ -38,6 +38,7 @@ FROM
 	design d
 JOIN 
 	report r ON d.design_id = r.reported_design_id;
+
 
 -- 4. Users who have items in shopping carts but have not placed an order along with the items
 SELECT
@@ -120,3 +121,4 @@ GROUP BY
 	d.design_id, d.title
 ORDER BY
 	reviews DESC;
+	

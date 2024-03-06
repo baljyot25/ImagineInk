@@ -66,10 +66,11 @@ CREATE TABLE ImaginInk.design (
   image BLOB NOT NULL,
   creation_date DATE,
   price INT NOT NULL,
-  sales_count INT NULL DEFAULT 0,
-  views_count INT NULL DEFAULT 0,
+  sales_count INT DEFAULT 0,
+  views_count INT DEFAULT 0,
   PRIMARY KEY (design_id),
-  FOREIGN KEY (artist_id) REFERENCES ImaginInk.artist (artist_id)
+  FOREIGN KEY (artist_id) REFERENCES ImaginInk.artist (artist_id),
+  CONSTRAINT chk_design_price CHECK (price > 0)
 );
 
 -- -----------------------------------------------------
@@ -78,7 +79,7 @@ CREATE TABLE ImaginInk.design (
 CREATE TABLE ImaginInk.tag (
   tag_id INT NOT NULL AUTO_INCREMENT,
   tag_name VARCHAR(45) NOT NULL,
-  description VARCHAR(45) NULL,
+  description VARCHAR(45),
   usage_count INT DEFAULT 0,
   PRIMARY KEY (tag_id)
 );
@@ -101,7 +102,7 @@ CREATE TABLE ImaginInk.artist_assist (
   request_id INT NOT NULL AUTO_INCREMENT,
   request_date DATE DEFAULT (CURRENT_DATE),
   description VARCHAR(100) NOT NULL,
-  request_status ENUM('pending', 'resolved') NULL,
+  request_status ENUM('pending', 'resolved') DEFAULT 'pending',
   request_closure_date DATE,
   artist_id INT NOT NULL,
   PRIMARY KEY (request_id),
@@ -115,7 +116,7 @@ CREATE TABLE ImaginInk.order (
   order_id INT NOT NULL AUTO_INCREMENT,
   order_date DATE NOT NULL,
   delivery_date DATE NOT NULL,
-  delivery_status ENUM('shipped', 'pending', 'delivered') NOT NULL,
+  delivery_status ENUM('shipped', 'pending', 'delivered') DEFAULT 'pending',
   PRIMARY KEY (order_id)
 );
 
@@ -124,8 +125,8 @@ CREATE TABLE ImaginInk.order (
 -- -----------------------------------------------------
 CREATE TABLE ImaginInk.shopping_cart (
   cart_id INT NOT NULL AUTO_INCREMENT,
-  grand_total INT NULL DEFAULT 0,
-  total_items INT NULL DEFAULT 0,
+  grand_total INT DEFAULT 0,
+  total_items INT DEFAULT 0,
   PRIMARY KEY (cart_id)
 );
 
@@ -139,7 +140,8 @@ CREATE TABLE ImaginInk.product (
   price INT NOT NULL,
   sales_count INT DEFAULT 0,
   dimensions ENUM('16x20', 'S, M, L, XL', 'Standard', 'Various', '18x24', 'A5', 'Set of 4') NOT NULL,
-  PRIMARY KEY (product_id)
+  PRIMARY KEY (product_id),
+  CONSTRAINT chk_product_price CHECK (price > 0)
 );
 
 -- -----------------------------------------------------

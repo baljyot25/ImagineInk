@@ -73,7 +73,7 @@ JOIN
 JOIN
     ImaginInk.order o ON vh.order_id = o.order_id
 GROUP BY
-    c.customer_id, u.username
+    c.customer_id
 ORDER BY
     total_purchases DESC;
 
@@ -110,7 +110,8 @@ JOIN
 	tag t ON dt.tag_id = t.tag_id
 ORDER BY
 	d.design_id ASC;
-    
+  
+  
 -- 8. Selecting most reviewed designs
 SELECT
 	d.design_id AS design_id,
@@ -123,7 +124,7 @@ LEFT JOIN
 LEFT JOIN
 	review r ON rrt.review_id = r.review_id
 GROUP BY
-	d.design_id, d.title
+	d.design_id
 ORDER BY
 	reviews DESC;
 
@@ -143,6 +144,7 @@ SET
 WHERE
 	c.address LIKE '%gandhi lane%';
     
+
 -- 10. Delete designs with their corresponding reviews that have been reported as containing hateful content
 DELETE 
 	design, 
@@ -158,7 +160,7 @@ JOIN
 WHERE 
 	r.report_description = 'Hateful content';
     
--- Showcasing Constraints
+-- Showcasing Constraints	
 INSERT INTO ImaginInk.user (email_id, password, username, account_status, full_name, registration_date, last_login_date, account_type, payment_method) VALUES
 -- Invalid query as saurabh@example.com has already been used as an email for a customer
 ('saurabh@example.com', 'password321', 'saurabh_mishra', 'logged_out', 'Saurabh Mishra', '2024-02-01', '2024-02-02', 'customer', 'Credit Card');

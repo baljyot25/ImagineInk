@@ -38,23 +38,16 @@ li,a
     flex-flow: row wrap;
     justify-content: space-between;
     /* justify-content: space-between; */
-    padding: 0px  2%;
+    padding: 10px  2%;
     align-items: center;
 
 }
 
-.header1-Items
-{
-    padding: 10px;
-}
 
-.header2
-{
-    display: flex;
-}
+
 
 #Logo {
-    border-radius: 50%; /* Make the border radius 50% of the width and height, creating a circular shape */
+    border-radius: 50%;
 }
 
 .navlinks
@@ -82,15 +75,41 @@ li,a
 
 .logos
 {
-    display: flex;
-    
+    display: flex;    
 }
 
 #name
 {
+    transition: all 0.3s ease 0s;
     font-size: 20px;
     font-weight: bold  ;
-    margin-top: 8px;
-    /* background-color: bl; */
+    margin-left: 20px;
     color: black;
+}
+
+.header2
+{
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+}
+
+.header2 li{
+
+    padding: 0 15px;
+}
+
+.header2 li a
+{
+    font-weight: 500;
+    color: black;
+    transition: all 0.3s ease 0s;
+}
+
+.header2 li a:hover
+{
+    font-weight: bold;
+    padding: 7px;
+    border-radius: 25px;
+    background-color: rgb(232, 232, 247);
 }

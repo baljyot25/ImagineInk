@@ -1,0 +1,52 @@
+*
+{
+    padding: 0;
+    margin: 0;
+}
+/* 
+#header
+{
+    background-color: rgb(177, 81, 177);
+    color: aqua;
+    height: 53px;
+    font-size: 27px;
+    display: grid;
+    align-items: center;
+    justify-content: center;
+    padding: 5px;
+    
+} */
+
+.header1
+{
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-between;
+    /* justify-content: space-between; */
+    padding: 10px  2%;
+    align-items: center;
+
+}
+
+.header1-Items
+{
+    padding: 10px;
+}
+
+.header2
+{
+    display: flex;
+}
+
+#Logo {
+    border-radius: 50%; /* Make the border radius 50% of the width and height, creating a circular shape */
+}
+
+.navlinks
+{
+    list-style: none;
+}
+.navlinks li{
+    display: inline-block;
+    padding: 0 15px;
+}

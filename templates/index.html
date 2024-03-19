@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ImagineInk</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css')}}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+</head>
+<body>
+
+    <div id ="header">
+        
+        <div class="header1">
+            <div class="logos">
+                
+                <img class="header1-Items" id="images/logo" src="static/images/webpage/logo.png" alt="could not load image"  width="30" height="30" >
+                <a id = "name" href="#">ImagineInk</a>
+   
+            </div>
+            
+            <div class="search-container">
+                <input type="search" class="search-input" placeholder="Search designs and products">
+                <div class="search-icon">
+                    <i class="fa fa-search"></i>
+                </div>
+            </div>
+
+            <div class="suggestion-list"></div>
+
+            <ul class="navlinks">
+                <li><a href="#">Sell your art</a></li>
+                <li><a href="#">Login</a></li>
+                <li><a href="#">Signup</a></li>
+                <li><a href="#">Cart</a></li>
+            </ul>
+           
+            
+        </div>
+
+        <ul class="header2">
+            <li><a href="#">Clothing</a></li>
+            <li><a href="#">Phone cases</a></li>
+            <li><a href="#">Stationery</a></li>
+            <li><a href="#">Explore Designs</a></li>
+            <li><a href="#">Others</a></li>
+        </div>
+         
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var searchContainer = document.querySelector('.search-container');
+            var tagList = document.querySelector('.suggestion-list');
+
+            searchContainer.addEventListener('click', function() {
+                var searchInput = document.querySelector('.search-input').value;
+                fetchSuggestions(searchInput);
+                tagList.style.display = 'block';
+            });
+
+            searchContainer.addEventListener('input', function() {
+                var searchInput = document.querySelector('.search-input').value;
+                fetchSuggestions(searchInput);
+                tagList.style.display = 'block';
+            });
+        });
+
+        function fetchSuggestions(searchText){
+            fetch('/search_bar_suggestions', {
+                method: 'POST',
+                body: JSON.stringify({'searchText': searchText}),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then (response => response.json())
+            .then (data => {
+                var tagList = document.querySelector('.suggestion-list');
+                tagList.innerHTML = '<ul class="suggestion-name">\n';
+                for (var i = 0; i < data.length; i++) {
+                    tagList.innerHTML += '<li><a>' + data[i] + '</a></li>\n';
+                }
+                tagList.innerHTML += '</ul>';
+
+            });
+        }
+
+            document.addEventListener('click', function(event) {
+                if (event.target.closest('.search-container') === null && event.target.closest('.suggestion-list') === null) {
+                    var tagList = document.querySelector('.suggestion-list');
+                    tagList.style.display = 'none';
+                }
+            });
+    </script>
+
+</body>
+</html>

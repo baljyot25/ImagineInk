@@ -7,17 +7,17 @@ export default class Login extends Component {
         <div>Log In</div>
         <div>Need an account? <a href="#">Sign Up</a></div>
         <form>
-            <div class="form-group">
+            <div className="form-group">
                 <label for="formGroupExampleInput">Email</label>
-                <input type="text" class="form-control" id="formGroupExampleInput" placeholder="Email Address"/>
+                <input type="text" className="form-control" id="formGroupExampleInput" placeholder="Email Address"/>
             </div>
-            <div class="form-group">
+            <div className="form-group">
                 <label for="formGroupExampleInput2">Password</label>
-                <input type="password" class="form-control" id="formGroupExampleInput2" placeholder="Password"/>
+                <input type="password" className="form-control" id="formGroupExampleInput2" placeholder="Password"/>
             </div>
 
         </form>
-        <button type="button" class="btn btn-danger">Log In</button>
+        <button type="button" className="btn btn-danger">Log In</button>
     </div>
     )
   }

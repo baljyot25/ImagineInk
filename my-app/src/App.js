@@ -4,6 +4,7 @@ import Login from './components/Login';
 import Navbar from './components/Navbar';
 
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import SignUp from './components/SignUp';
 
 function App() {
 
@@ -15,11 +16,11 @@ function App() {
     {
       path: "/login",
       element: <><Login/></>
+    },
+    {
+      path: "/signup",
+      element: <><SignUp/></>
     }
-    // {
-    //   path: "/about",
-    //   element: <><Navbar /><About /></>
-    // },
     // {
     //   path: "/user/:username",
     //   element: <><Navbar /><User /></>
@@ -27,7 +28,8 @@ function App() {
   ])
   return (
     <>
-
+    {/* <SignUp
+    ></SignUp> */}
 
   <RouterProvider router={router} />
 

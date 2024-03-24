@@ -26,10 +26,10 @@ export default class Navbar extends Component {
 
             <div className="suggestion-list"></div>
 
-            <ul className="navlinks">
+            <ul className="navlinks">   
                 <li><a href="/">Sell your art</a></li>
                 <li><Link to="/login">Login</Link></li>
-                <li><a href="/">Signup</a></li>
+                <li><Link to="/signup">Signup</Link></li>
                 <li><a href="/">Cart</a></li>
             </ul>
            

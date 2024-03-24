@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import Navbar from './Navbar'
-import unicorn from '../Design/Unicorn.png';
+import unicorn from '../images/Design/Unicorn.png';
 import { Link } from 'react-router-dom'
 
 export default class Home extends Component {

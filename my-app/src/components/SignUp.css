@@ -1,0 +1,96 @@
+/* Overall styles */
+body {
+    background-color: #fff; /* White background */
+    font-family: Arial, sans-serif; /* Same font as Redbubble */
+    color: #212121; /* Black for most text */
+  }
+  
+  /* Container styling */
+  .container {
+    width: 380px; /* Adjust width as needed */
+    margin: 50px auto; /* Center the container vertically and horizontally */
+    padding: 40px; /* More padding for signup form */
+    border-radius: 5px; /* Rounded corners */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow effect */
+  }
+  
+  /* Signup text styling */
+  .signup-text {
+    text-align: center; /* Center the text */
+    font-size: 20px; /* Slightly larger font size */
+    font-weight: bold; /* Bold text */
+    margin-bottom: 20px; /* Add some space below */
+    color: #212121; /* Black for signup text */
+  }
+  
+  /* Form group styling */
+  .form-group {
+    margin-bottom: 15px; /* Add spacing between form elements */
+  }
+  
+  /* Label styling */
+  .form-group label {
+    display: block; /* Make labels block-level elements */
+    margin-bottom: 5px; /* Add space below labels */
+    font-weight: normal; /* Regular font weight */
+    color: #212121; /* Black for label text */
+  }
+  
+  /* Input field styling */
+  .form-group input[type="text"],
+  .form-group input[type="email"],
+  .form-group input[type="password"] {
+    width: 100%; /* Make inputs full width */
+    padding: 10px 15px; /* Adjust padding for better user experience */
+    background-color: #f5f5f5; /* Light gray background for input fields */
+    border: 1px solid #ccc; /* Light border */
+    border-radius: 3px; /* Rounded corners */
+    box-sizing: border-box; /* Ensure padding doesn't affect width */
+    font-size: 14px; /* Use the same font size as Redbubble */
+  }
+  
+  /* Input placeholder styling */
+  .form-group input[type="text"]::-webkit-input-placeholder,
+  .form-group input[type="email"]::-webkit-input-placeholder,
+  .form-group input[type="password"]::-webkit-input-placeholder {
+    color: #bdbdbd; /* Light gray placeholder color */
+  }
+  
+  /* Checkbox styling */
+  .form-group input[type="checkbox"] {
+    margin-right: 5px; /* Add space after checkbox */
+  }
+  
+  /* Terms link styling */
+  .terms-link {
+    color: #333; /* Darker gray for terms link */
+    font-size: 12px; /* Smaller font size */
+    text-decoration: underline; /* Underline the link */
+  }
+  
+  /* Select element styling */
+  .form-group select {
+    width: 100%; /* Make select full width */
+    padding: 10px 15px; /* Adjust padding for consistency */
+    background-color: #f5f5f5; /* Light gray background */
+    border: 1px solid #ccc; /* Light border */
+    border-radius: 3px; /* Rounded corners */
+    box-sizing: border-box; /* Ensure padding doesn't affect width */
+    font-size: 14px; /* Use the same font size as Redbubble */
+  }
+  
+  /* Button styling */
+  .btn-primary {
+    width:100%;
+    background-color: #df0030; /* Blue background color for signup button (same as Redbubble) */
+    color: #fff; /* White text color */
+    padding: 10px 20px; /* Adjust padding as needed */
+    border: none; /* Remove default button border */
+    border-radius: 5px; /* Rounded corners */
+    cursor: pointer; /* Indicate hover interaction */
+    font-size: 14px; /* Use the same font size as Redbubble */
+    font-weight: bold; /* Bold text for button */
+  }
+  
+  /* Button hover effect (optional) */
+  

@@ -2,6 +2,8 @@
 import './App.css';
 import Login from './components/Login';
 import Navbar from './components/Navbar';
+import Homepage from './components/Homepage';
+
 
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import SignUp from './components/SignUp';
@@ -11,11 +13,11 @@ function App() {
   const router = createBrowserRouter([
     {
       path: "/",
-      element: <><Navbar /></>
+      element: <><Homepage /></>
     },
     {
       path: "/login",
-      element: <><Login/></>
+      element: <><Login /></>
     },
     {
       path: "/signup",
@@ -30,7 +32,7 @@ function App() {
     <>
     {/* <SignUp
     ></SignUp> */}
-
+    {/* <Homepage></Homepage> */}
   <RouterProvider router={router} />
 
 

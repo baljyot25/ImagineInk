@@ -1,0 +1,158 @@
+@import url('https://fonts.googleapis.com/css2?family=Asar&family=Poppins:wght@100&display=swap');
+
+
+*
+{
+    padding: 0;
+    margin: 0;
+    /* box-sizing: border-box; */
+}
+
+
+li,a
+{
+    font-family: "Asar";
+    /* font-size: 16px; */
+    text-decoration: none;
+}
+
+.header1
+{
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-between;
+    /* justify-content: space-between; */
+    padding: 10px  2%;
+    align-items: center;
+
+}
+
+
+
+
+#Logo {
+    border-radius: 50%;
+}
+
+
+.search-container {
+    display: flex;
+    align-items: center;
+    width: 800px; 
+    height: 45px;
+    border: 2px solid;
+    border-image: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet) 1;
+    border-radius: 5px;
+    overflow: hidden; 
+    background-color: rgb(234, 238 , 242);
+}
+
+.suggestion-list {
+    position: fixed;
+    background-color: rgb(234, 238 , 242);
+    width: 800px;
+    height: 190px;
+    border: 2px solid;
+    border-image: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet) 1;
+    border-radius: 5px;
+    overflow: hidden;
+    display: none;
+    top: 59px;
+    left: 277px;
+    z-index: 9999;
+    grid-template-columns: (1, 1fr);
+}
+
+.search-input {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    outline: none;
+    background-color: rgb(234, 238 , 242);
+}
+
+.search-icon {
+    padding: 10px;
+    background-color: rgb(234, 238 , 242);
+    color:black; /* Adjust color as needed */
+    cursor: pointer;
+}
+
+.suggestion-name {
+    list-style: none;
+}
+
+.suggestion-name li {
+    display: block;
+    padding: 5px;
+}
+
+.suggestion-name li a {
+    color: black;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.navlinks
+{
+    list-style: none;
+}
+.navlinks li{
+    display: inline-block;
+    padding: 0 15px;
+}
+
+.navlinks li a
+{
+    font-weight: bold;
+    color: black;
+    transition: all 0.3s ease 0s;
+}
+
+.navlinks li a:hover
+{
+    padding: 7px;
+    border-radius: 25px;
+    background-color: rgb(232, 232, 247);
+}
+
+.logos
+{
+    display: flex;    
+}
+
+#name
+{
+    transition: all 0.3s ease 0s;
+    font-size: 20px;
+    font-weight: bold  ;
+    margin-left: 20px;
+    color: black;
+}
+
+.header2
+{
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+}
+
+.header2 li{
+
+    padding: 0 15px;
+}
+
+.header2 li a
+{
+    font-weight:200;
+    color: black;
+    transition: all 0.3s ease 0s;
+}
+
+.header2 li a:hover
+{
+    font-weight: bold;
+    padding: 7px;
+    border-radius: 25px;
+    background-color: rgb(232, 232, 247);
+}

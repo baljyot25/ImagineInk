@@ -13,7 +13,7 @@ app.secret_key = os.urandom(24)
 
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'password'
+app.config['MYSQL_PASSWORD'] = 'banta259'
 app.config['MYSQL_DB'] = 'imaginink'
 app.config['SESSION_TYPE'] = 'filesystem'
 
@@ -104,58 +104,49 @@ def customer_login():
         return jsonify({"status": "successfully logged in", "user": user_details}), 200
     else:
         return jsonify({"status": "invalid credentials"}), 200
-    
+
 @app.route('/customer/cart', methods=['POST'])
 def customer_cart():
-    if 'user_id' not in session:
-        return {"status": "user not logged in"}
-    user_id = session['user_id']
+    user_details = request.json
+    user_id = user_details['customer_id']
     query = f"""
-        SELECT d.image, d.title, p.image, p.title, ci.quantity, ci.price
+        SELECT d.design_id, d.title, p.product_id, p.title, ci.quantity, ci.price
         FROM cart_items ci
         JOIN carry c ON ci.cart_id = c.cart_id
         JOIN product p ON ci.product_id = p.product_id
         JOIN design d ON ci.design_id = d.design_id
         WHERE c.customer_id = {user_id};
     """
-    if 'cart_id' in session:
-        query = f"""
-            SELECT d.image, d.title, p.image, p.title, ci.quantity, ci.price
-            FROM cart_items ci
-            JOIN product p ON ci.product_id = p.product_id
-            JOIN design d ON ci.design_id = d.design_id
-            WHERE ci.cart_id = {session['cart_id']};
-        """
     cur = mysql.connection.cursor()
     cur.execute(query)
     cart = cur.fetchall()
-    if 'cart_id' not in session:
-        query = f"""
-            SELECT cart_id FROM ImaginInk.carry WHERE customer_id = {user_id};
-        """
-        cur.execute(query)
-        cart_id = cur.fetchone()
-        session['cart_id'] = cart_id[0]
     cur.close()
-    user_cart = {}
+    design_ids = []
+    design_titles = []
+    product_ids = []
+    product_titles = []
+    quantities = []
+    prices = []
     total_price = 0
     total_items = 0
     for item in cart:
-        user_cart[item[1]] = {
-            "design": {
-                "image": item[0],
-                "title": item[1]
-            },
-            "product": {
-                "image": item[2],
-                "title": item[3]
-            },
-            "quantity": item[4],
-            "price": item[5]
-        }
+        design_ids.append(item[0])
+        design_titles.append(item[1])
+        product_ids.append(item[2])
+        product_titles.append(item[3])
+        quantities.append(item[4])
+        prices.append(item[5])
         total_price += item[5]
         total_items += 1
-    return {"status": "successfully fetched cart", "cart": user_cart, "total_price": total_price, "total_items": total_items}
+    return jsonify({"status": "successfully fetched cart",
+            "total_price": total_price, 
+            "total_items": total_items,
+            "design_ids": design_ids,
+            "design_titles": design_titles,
+            "product_ids": product_ids,
+            "product_titles": product_titles,
+            "quantities": quantities,
+            "prices": prices}), 200
 
 @app.route('/customer/view_designs', methods=['POST'])
 def customer_view_designs():
@@ -299,9 +290,7 @@ def customer_decrease_item_quantity():
 
 @app.route('/customer/place_order', methods=['POST'])
 def customer_place_order():
-    if 'user_id' not in session:
-        return {"status": "user not logged in"}
-    user_id = session['user_id']
+    user_id = request.json('customer_id')
     cur = mysql.connection.cursor()
     if 'cart_id' not in session:
         query = f"""
@@ -317,7 +306,7 @@ def customer_place_order():
     cur.execute(query)
     total_items = cur.fetchone()
     if total_items[0] == 0:
-        return {"status": "cart is empty"}
+        return jsonify({"status": "cart is empty"}), 400
     date = str(datetime.now().date())
     delivery_date = str(datetime.now().date() + timedelta(days=4))
     query = f"""
@@ -327,8 +316,9 @@ def customer_place_order():
         (LAST_INSERT_ID(), {cart_id});
     """
     cur.execute(query)
+    mysql.connection.commit()
     cur.close()
-    return {"status": "successfully placed order"}
+    return jsonify({"status": "successfully placed order"}), 200
 
 @app.route('/customer/logout')
 def customer_logout():

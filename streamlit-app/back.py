@@ -5,21 +5,25 @@ import MySQLdb.cursors
 import re
 from datetime import datetime
 import sys
+import os
 
 app = Flask(__name__)
 
-app.secret_key = "apple"
+app.secret_key = os.urandom(24)
 
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = 'password'
 app.config['MYSQL_DB'] = 'imaginink'
+app.config['SESSION_TYPE'] = 'filesystem'
+
+Session(app)
 
 mysql = MySQL(app)
 
+
 @app.route('/customer/signup', methods=['POST', 'GET'])
 def customer_signup():
-    print("hello", file=sys.stderr)
     user_details = request.json
     email_id = user_details['email_id']
     password = user_details['password']
@@ -27,7 +31,6 @@ def customer_signup():
     full_name = user_details['full_name']
     payment_method = user_details['payment_method']
     address = user_details['address']
-    # print(email_id)
     date = str(datetime.now().date())
     query = f"""
         INSERT INTO ImaginInk.user (email_id, password, username, account_status, full_name, registration_date, last_login_date, account_type, payment_method) VALUES
@@ -60,8 +63,8 @@ def customer_signup():
     
 @app.route('/customer/login', methods=['POST'])
 def customer_login():
-    user_details = request.form
-    email_id = user_details['email']
+    user_details = request.json
+    email_id = user_details['email_id']
     password = user_details['password']
     query = f"""
         SELECT * FROM ImaginInk.user WHERE email_id = '{email_id}' AND password = '{password}' AND account_type = 'customer';
@@ -72,8 +75,9 @@ def customer_login():
     cur.close()
     if user:
         if user[3] == 'deleted':
-            return {"status": "account has been deleted"}
+            return jsonify({"status": "account has been deleted"}), 400
         session['user_id'] = user[0]
+        print(f"User id: {session['user_id']}", file=sys.stderr)
         user_id = user[0]
         query = f"""
             SELECT * FROM ImaginInk.customer WHERE customer_id = {user_id};
@@ -94,10 +98,12 @@ def customer_login():
             "full_name": user[5],
             "payment_method": user[9],
             "registration_date": user[6],
+            "user_id": user_id
         }
-        return {"status": "successfully logged in", "user": user_details}
+        print(session, file=sys.stderr)
+        return jsonify({"status": "successfully logged in", "user": user_details}), 200
     else:
-        return {"status": "invalid credentials"}
+        return jsonify({"status": "invalid credentials"}), 200
     
 @app.route('/customer/cart', methods=['POST'])
 def customer_cart():
@@ -153,9 +159,11 @@ def customer_cart():
 
 @app.route('/customer/view_designs', methods=['POST'])
 def customer_view_designs():
-    if 'user_id' not in session:
-        return {"status": "user not logged in"}
-    user_id = session['user_id']
+    # if 'user_id' not in session:
+    #     print("No user id", file=sys.stderr)
+    #     return jsonify({"status": "user not logged in"}), 400
+    # user_id = session['user_id']
+    # print(user_id, file=sys.stderr)
     query = f"""
         SELECT * FROM design
         WHERE status = 'visible';
@@ -164,21 +172,19 @@ def customer_view_designs():
     cur.execute(query)
     designs = cur.fetchall()
     cur.close()
-    user_designs = {}
+    design_ids = []
+    design_titles = []
+    design_prices = []
+    design_description = []
     for design in designs:
-        user_designs[design[0]] = {
-            "title": design[2],
-            "description": design[3],
-            "image": design[4],
-            "price": design[6]
-        }
-    return {"status": "successfully fetched designs", "designs": user_designs}
+        design_ids.append(design[0])
+        design_titles.append(design[2])
+        design_prices.append(design[6])
+        design_description.append(design[3])
+    return jsonify({"status": "successfully fetched designs", "design_ids": design_ids, "design_titles": design_titles, "design_prices": design_prices, "design_descriptions": design_description}), 200
 
 @app.route('/customer/view_products', methods=['POST'])
 def customer_view_products():
-    if 'user_id' not in session:
-        return {"status": "user not logged in"}
-    user_id = session['user_id']
     query = f"""
         SELECT * FROM product;
     """
@@ -186,15 +192,18 @@ def customer_view_products():
     cur.execute(query)
     products = cur.fetchall()
     cur.close()
-    user_products = {}
+    product_ids = []
+    product_titles = []
+    product_prices = []
+    product_dimensions = []
     for product in products:
-        user_products[product[0]] = {
-            "title": product[1],
-            "image": product[2],
-            "price": product[3],
-            "dimensions": product[4]
-        }
-    return {"status": "successfully fetched products", "products": user_products}
+        product_ids.append(product[0])
+        product_titles.append(product[1])
+        product_prices.append(product[3])
+    return jsonify({"status": "successfully fetched products", 
+            "product_ids": product_ids, 
+            "product_titles": product_titles, 
+            "product_prices": product_prices}), 200
     
 @app.route('/customer/select_design', methods=['POST'])
 def customer_select_design():

@@ -12,7 +12,7 @@ app.secret_key = "apple"
 
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'password'
+app.config['MYSQL_PASSWORD'] = 'banta259`'
 app.config['MYSQL_DB'] = 'imaginink'
 
 mysql = MySQL(app)

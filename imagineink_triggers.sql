@@ -35,16 +35,6 @@ DELIMITER //
 CREATE TRIGGER add_cart_item AFTER INSERT ON ImaginInk.cart_items
 FOR EACH ROW
 BEGIN
-    UPDATE ImaginInk.cart_items
-        SET price = (SELECT price FROM ImaginInk.product WHERE product_id = NEW.product_id)
-            + (SELECT price FROM ImaginInk.design WHERE design_id = NEW.design_id)
-        WHERE cart_id = NEW.cart_id;
-    UPDATE ImaginInk.cart_items 
-        SET quantity = 1
-        WHERE cart_id = NEW.cart_id
-        AND product_id = NEW.product_id
-        AND design_id = NEW.design_id;
-
     UPDATE ImaginInk.shopping_cart
         SET grand_total = grand_total + NEW.price
         WHERE cart_id = NEW.cart_id;
@@ -54,7 +44,7 @@ BEGIN
 END //
 
 DELIMITER //
-CREATE TRIGGER update_cart_item AFTER UPDATE ON ImaginInk.cart_items
+CREATE TRIGGER update_cart_item BEFORE UPDATE ON ImaginInk.cart_items
 FOR EACH ROW
 BEGIN
     DECLARE individual_price INT;
@@ -62,17 +52,11 @@ BEGIN
     SET individual_price = (SELECT price FROM ImaginInk.product WHERE product_id = NEW.product_id)
             + (SELECT price FROM ImaginInk.design WHERE design_id = NEW.design_id);
 
-    UPDATE ImaginInk.cart_items
-        SET price = individual_price * NEW.quantity
-        WHERE cart_id = NEW.cart_id
-        AND product_id = NEW.product_id
-        AND design_id = NEW.design_id;
+	UPDATE ImaginInk.shopping_cart
+        SET grand_total = grand_total - OLD.price + individual_price * NEW.quantity
+        WHERE cart_id = NEW.cart_id;
 
-    UPDATE ImaginInk.shopping_cart
-        SET grand_total = grand_total - OLD.price + NEW.price
-        WHERE id = NEW.cart_id;
-    DELETE FROM ImaginInk.cart_item
-        WHERE quantity = 0;
+    SET NEW.price = individual_price * NEW.quantity;
 END //
 
 DELIMITER //

@@ -7,7 +7,8 @@ st.set_page_config(initial_sidebar_state="collapsed")
 def view_designs():
     if "customer_id" not in st.session_state:
         st.error("User not logged in")
-        return
+        sleep(1)
+        st.switch_page('your_app.py')
 
     st.title('Designs')
 
@@ -18,10 +19,10 @@ def view_designs():
         st.error(f"Error fetching designs: {e}")
         return  # Exit function if API request fails
 
-    # Add button for cart option
-    if st.button('Cart'):
-        # Add cart functionality here, such as displaying items in the cart and total price
-        st.switch_page("pages/viewCart.py")
+    col1, col2 = st.columns([7, 1])
+    with col2:
+        if st.button('Cart'):
+            st.switch_page("pages/viewCart.py")
 
     for i in range(len(response['design_ids'])):
         design_id = response['design_ids'][i]
@@ -41,7 +42,7 @@ def view_designs():
             # Create a unique key for each button
             button_key = f'select_design_{design_id}'
             if st.button('Select Design', key=button_key):
-                selected_design_id = design_id
+                st.session_state.design_id = design_id
                 st.success(f'Design {design_title} selected (ID: {design_id})')
 
                 # Trigger switch_page when button is clicked
@@ -51,3 +52,9 @@ def view_designs():
 
 if __name__ == '__main__':
     view_designs()
+    if st.button('Logout'):
+        for key in st.session_state.keys():
+            del st.session_state[key]
+        st.success('Logged out successfully')
+        sleep(1)
+        st.switch_page('your_app.py')

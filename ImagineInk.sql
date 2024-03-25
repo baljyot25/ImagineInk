@@ -464,7 +464,7 @@ INSERT INTO ImaginInk.cart_items (cart_id, product_id, quantity, price, design_i
 (8, 1, 1, 170, 8),
 (9, 1, 1, 180, 9),
 (10, 1, 1, 190, 10),
-(11, 1, 2, 100, 1),
+(11, 1, 2, 200, 1),
 (11, 3, 1, 75, 2),
 (13, 2, 1, 90, 3),
 (14, 5, 2, 220, 4);

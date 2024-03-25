@@ -13,6 +13,14 @@ def view_products():
     #     st.error('Design not selected')
     #     sleep(1)
     #     redirect('view_designs')
+    if 'customer_id' not in st.session_state:
+        st.error('User not logged in')
+        sleep(1)
+        st.switch_page("your_app.py")
+    if 'design_id' not in st.session_state:
+        st.error('Design not selected')
+        sleep(1)
+        st.switch_page("pages/viewDesigns.py")
     st.title('Products')
     response = requests.post('http://localhost:8000/customer/view_products')
     response = response.json()
@@ -30,20 +38,26 @@ def view_products():
             # st.write(f'Dimensions: {product_dimension}')
             st.write(f'Price: Rs. {product_price}')
             if st.button('Add to Cart', key=product_id):
-                pass
-                # response = requests.post('http://localhost:8000/customer/add_to_cart', json={
-                #     'customer_id': st.session_state.customer_id,
-                #     'design_id': st.session_state.selsected_design_id,
-                #     'product_id': product_id
-                # })
-                # response = response.json()
-                # if response['status'] == 'success':
-                #     st.success('Added to cart')
-                # else:
-                #     st.error('Failed to add to cart')
+                response = requests.post('http://localhost:8000/customer/add_to_cart', json={
+                    'customer_id': st.session_state.customer_id,
+                    'design_id': st.session_state.design_id,
+                    'product_id': product_id
+                })
+                response = response.json()
+                if response['status'] == 'successfully added to cart':
+                    st.success('Added to cart')
+                else:
+                    st.error('Failed to add to cart')
+                sleep(1)
                 st.switch_page("pages/viewDesigns.py")
             
             st.write('---')
 
 if __name__ == '__main__':
     view_products()
+    if st.button('Logout'):
+        for key in st.session_state.keys():
+            del st.session_state[key]
+        st.success('Logged out successfully')
+        sleep(1)
+        st.switch_page('your_app.py')

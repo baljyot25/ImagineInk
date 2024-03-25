@@ -1,12 +1,10 @@
 
 import streamlit as st
 import requests
-
 import datetime
 from time import sleep
-# import streamlit as st
+
 st.set_page_config(initial_sidebar_state="collapsed")
-# Create an expander with its content initially hidden
 
 st.markdown(
     """
@@ -19,21 +17,6 @@ st.markdown(
             border: 1px solid #ccc;
         }
         /* Style the button */
-        .stButton>button {
-            background-color: #4CAF50; /* Green */
-            color: white;
-            padding: 10px 20px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 16px;
-            margin: 4px 2px;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-        .stButton>button:hover {
-            background-color: #45a049;
-        }
         /* Error message style */
         .error-text {
             color: red;
@@ -54,7 +37,7 @@ def admin_login():
         elif password == '':
             st.error('Password cannot be empty.')
         else:
-            response = requests.post('http://localhost:8000/customer/login', json={
+            response = requests.post('http://localhost:8000/admin/login', json={
                 'username': username,
                 'password': password
             })
@@ -65,6 +48,7 @@ def admin_login():
                 st.success('Login successful!')
                 sleep(1)
                 st.session_state.admin_id = response['admin_id']
+                st.switch_page("pages/adminDashboard.py")
                 # redirect('admin_dashboard')
 
     
@@ -104,10 +88,9 @@ def customer_signup():
             if response['status'] == 'email':
                 st.error('Invalid Email/Email already in use')
             else:
-                st.success('Signup successful!') 
-                if st.button('Proceed to Login'):
-                    st.empty()
-                    customer_login()
+                st.success('Sign Up successful!') 
+                sleep(1)
+                st.write('Proceed to [Login](?page=customer_login)')
 
 
 def customer_login():
@@ -137,7 +120,7 @@ def customer_login():
                 st.session_state.customer_id = response['user']['user_id']
                 # st.session_state.redirected_view_designs = True
                 st.switch_page("pages/viewDesigns.py")
-    st.write('Login as? [Admin](?page=admin_login)')
+    st.write('Login as [Admin](?page=admin_login)?')
         
 # def admin_login():
 

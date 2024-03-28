@@ -1,49 +1,38 @@
-import React, { Component } from 'react';
-import './SignUp.css'; // Import the generated CSS file
+import React, { useState } from 'react';
+import './Signup.css'; // Import the created CSS file
+import axios from 'axios';
 
-export default class SignUp extends Component {
-  render() {
-    return (
-      <div className="container"> {/* Wrap elements in the container class */}
-        <div className="signup-text"> {/* Add class for signup text */}
-          Sign Up
+const Signup = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post('http://localhost:8000/artist/signup', { email, password });
+      // handle the response 
+    } catch (error) {
+      // handle the error
+    }
+  };
+
+  return (
+    <div className="container">
+      <h1 className="signup-text">Sign Up</h1>
+      <div>Already have an account? <a href="#">Log In</a></div>
+      <form onSubmit={handleSubmit}>
+        <div className="form-group">
+          <label htmlFor="email">Email</label>
+          <input type="text" className="form-control" id="email" placeholder="Email Address" value={email} onChange={e => setEmail(e.target.value)} />
         </div>
-        <form>
-          <div className="form-group">
-            <label htmlFor="formGroupExampleInput">Email</label>
-            <input type="text" className="form-control" id="formGroupExampleInput" placeholder="Email Address" />
-          </div>
-          <div className="form-group">
-            <label htmlFor="formGroupExampleInput2">Password</label>
-            <input type="password" className="form-control" id="formGroupExampleInput2" placeholder="Password" />
-          </div>
-          <div className="form-group">
-            <label htmlFor="formGroupExampleInput3">Username</label>
-            <input type="text" className="form-control" id="formGroupExampleInput3" placeholder="Username" />
-          </div>
-          <div className="form-group">
-            <label htmlFor="formGroupExampleInput4">Full Name</label>
-            <input type="text" className="form-control" id="formGroupExampleInput4" placeholder="Full Name" />
-          </div>
-          <div className="form-group">
-            <label htmlFor="paymentMethod">Payment Method</label>
-            <select className="form-control" id="paymentMethod">
-              <option value="credit-card">Credit Card</option>
-              <option value="paytm">PayTM</option>
-              <option value="google-pay">Google Pay</option>
-              <option value="bank-transfer">Bank Transfer</option>
-            </select>
-          </div>
-          <div className="form-group">
-            <label htmlFor="formGroupExampleInput6">Address</label>
-            <input type="text" className="form-control" id="formGroupExampleInput6" placeholder="Address" />
-          </div>
-        </form>
-        <button type="button" className="btn-primary">Sign Up</button> {/* Use btn-primary for blue button */}
-        <div>
-          Already have an account? <a href="#">Log In</a>
+        <div className="form-group">
+          <label htmlFor="password">Password</label>
+          <input type="password" className="form-control" id="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} />
         </div>
-      </div>
-    );
-  }
-}
+        <button type="submit" className="btn btn-danger">Sign Up</button>
+      </form>
+    </div>
+  );
+};
+
+export default Signup;

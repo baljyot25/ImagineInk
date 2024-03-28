@@ -5,9 +5,9 @@ import MySQLdb.cursors
 import re
 from datetime import datetime
 import sys
-
+from flask_cors import CORS
 app = Flask(__name__)
-
+CORS(app)
 app.secret_key = "apple"
 
 app.config['MYSQL_HOST'] = 'localhost'

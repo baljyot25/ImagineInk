@@ -3,6 +3,7 @@ import requests
 from time import sleep
 import pymysql
 import pandas as pd
+
 st.set_page_config(initial_sidebar_state="collapsed", layout='wide')
 
 def admin_view_artists():
@@ -172,7 +173,7 @@ if __name__ == '__main__':
     if 'admin_id' not in st.session_state:
         st.error('Admin not logged in')
         sleep(1)
-        st.switch_page("your_app.py")
+        st.switch_page("home.py")
     st.title('Admin Dashboard')
     selection_param = st.selectbox('Select', ['Artists', 'Customers', 'Designs', 'Products'])
     if selection_param == 'Artists':
@@ -184,8 +185,7 @@ if __name__ == '__main__':
     elif selection_param == 'Products':
         admin_view_products()
     if st.button('Logout'):
-        for key in st.session_state.keys():
-            del st.session_state[key]
+        del st.session_state['admin_id']
         st.success('Logged out successfully')
         sleep(1)
-        st.switch_page('your_app.py')
+        st.switch_page('home.py')

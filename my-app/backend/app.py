@@ -8,12 +8,12 @@ import sys
 from flask_cors import CORS
 from datetime import timedelta
 app = Flask(__name__)
-CORS(app)
 app.secret_key = "apple"
+CORS(app)  # This will enable CORS for all routes
 
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'banta259`'
+app.config['MYSQL_PASSWORD'] = 'password'
 app.config['MYSQL_DB'] = 'imaginink'
 
 mysql = MySQL(app)
@@ -59,7 +59,7 @@ def customer_signup():
     else:
         return jsonify({"status": "email"}), 400
     
-@app.route('/customer/login', methods=['POST'])
+@app.route('/customer/login', methods=['POST','GET'])
 def customer_login():
     user_details = request.form
     email_id = user_details['email']
@@ -705,4 +705,5 @@ def admin_view_products():
     
 
 if __name__ == '__main__':
-    app.run(host='localhost', port=8000, debug=True)
+    # app.run(host='localhost', port=8000, debug=True)
+    app.run(port=8000)

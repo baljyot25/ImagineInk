@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './Signup.css'; // Import the created CSS file
+import './SignUp.css'; // Import the created CSS file
 import axios from 'axios';
 
 const Signup = () => {
@@ -9,8 +9,10 @@ const Signup = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:8000/artist/signup', { email, password });
+      console.log("sign up called");
+      const response = await axios.post('http://127.0.0.1:8000/customer/login', { 'email': email, 'password': password });
       // handle the response 
+      console.log(response);
     } catch (error) {
       // handle the error
     }

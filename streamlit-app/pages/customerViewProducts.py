@@ -5,23 +5,20 @@ import pymysql
 st.set_page_config(initial_sidebar_state="collapsed")
 
 def view_products():
-    # if 'customer_id' not in st.session_state:
-    #     st.error('User not logged in')
-    #     sleep(1)
-    #     redirect('customer_login')
-    # elif 'selected_design_id' not in st.session_state:
-    #     st.error('Design not selected')
-    #     sleep(1)
-    #     redirect('view_designs')
     if 'customer_id' not in st.session_state:
         st.error('User not logged in')
         sleep(1)
-        st.switch_page("your_app.py")
+        st.switch_page("home.py")
     if 'design_id' not in st.session_state:
         st.error('Design not selected')
         sleep(1)
-        st.switch_page("pages/viewDesigns.py")
+        st.switch_page("pages/customerViewDesigns.py")
     st.title('Products')
+    col1, col2 = st.columns([7, 1])
+    with col2:
+        if st.button('Back'):
+            del st.session_state['design_id']
+            st.switch_page("pages/customerViewDesigns.py")
     response = requests.post('http://localhost:8000/customer/view_products')
     response = response.json()
     for i in range(0, len(response['product_ids'])):
@@ -49,7 +46,7 @@ def view_products():
                 else:
                     st.error('Failed to add to cart')
                 sleep(1)
-                st.switch_page("pages/viewDesigns.py")
+                st.switch_page("pages/customerViewDesigns.py")
             
             st.write('---')
 
@@ -60,4 +57,4 @@ if __name__ == '__main__':
             del st.session_state[key]
         st.success('Logged out successfully')
         sleep(1)
-        st.switch_page('your_app.py')
+        st.switch_page('home.py')

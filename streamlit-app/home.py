@@ -117,13 +117,71 @@ def customer_login():
                 st.success('Login successful!')
                 sleep(1)
                 # st.empty()
-                st.session_state.customer_id = response['user']['user_id']
+                st.session_state.customer_id = response['user_id']
                 # st.session_state.redirected_view_designs = True
-                st.switch_page("pages/viewDesigns.py")
+                st.switch_page("pages/customerViewDesigns.py")
     st.write('Login as [Admin](?page=admin_login)?')
+    st.write('[Sell](?page=artist_login) your designs?')
         
 # def admin_login():
 
+def artist_login():
+    st.title('Artist Login')
+    st.write('New user? [Sign Up](?page=artist_signup) here')
+    email_id = st.text_input('Email ID', max_chars=45)
+    password = st.text_input('Password', type='password', max_chars=45)
+    if st.button('Login'):
+        if email_id == '':
+            st.error('Email ID cannot be empty.')
+        elif password == '':
+            st.error('Password cannot be empty.')
+        else:
+            response = requests.post('http://localhost:8000/artist/login', json={
+                'email_id': email_id,
+                'password': password
+            })
+            response = response.json()
+            if response['status'] == 'invalid credentials':
+                st.error('Invalid Username/Password')
+            elif response['status'] == 'account has been deleted':
+                st.error('Account has been deleted')
+            else:
+                st.success('Login successful!')
+                sleep(1)
+                st.session_state.artist_id = response['artist_id']
+                st.switch_page("pages/artistDashboard.py")
+
+def artist_signup():
+    st.title('Artist Sign Up')
+    email_id = st.text_input('Email ID', max_chars=45)
+    password = st.text_input('Password', type='password', max_chars=45)
+    full_name = st.text_input('Full Name', max_chars=45)
+    username = st.text_input('Display Name', max_chars=45)
+    payment_method = st.selectbox('Payment Method', ['Credit Card', 'PayTM', 'Google Pay', 'Bank Transfer'])
+    if st.button('Signup'):
+        if email_id == '':
+            st.error('Email ID cannot be empty.')
+        elif password == '':
+            st.error('Password cannot be empty.')
+        elif full_name == '':
+            st.error('Full Name cannot be empty.')
+        elif username == '':
+            st.error('Display Name cannot be empty.')
+        else:
+            response = requests.post('http://localhost:8000/artist/signup', json={
+                'email_id': email_id,
+                'password': password,
+                'full_name': full_name,
+                'username': username,
+                'payment_method': payment_method
+            })
+            response = response.json()
+            if response['status'] == 'email':
+                st.error('Invalid Email/Email already in use')
+            else:
+                st.success('Sign Up successful!')
+                sleep(1)
+                st.write('Proceed to [Login](?page=artist_login)')
                 
 if __name__ == '__main__':
 
@@ -136,3 +194,7 @@ if __name__ == '__main__':
         customer_signup()
     elif query_params[0] == 'admin_login':
         admin_login()
+    elif query_params[0] == 'artist_login':
+        artist_login()
+    elif query_params[0] == 'artist_signup':
+        artist_signup()

@@ -10,8 +10,7 @@ def view_cart():
     if 'customer_id' not in st.session_state:
         st.error('User not logged in')
         sleep(1)
-        # redirect('customer_login')
-        st.switch_page("your_app.py")
+        st.switch_page("home.py")
 
     st.title('Cart')
     response = requests.post('http://localhost:8000/customer/cart', json={
@@ -20,7 +19,7 @@ def view_cart():
     col1, col2 = st.columns([4, 1])
     with col2:
         if st.button('View Designs'):
-            st.switch_page("pages/viewDesigns.py")
+            st.switch_page("pages/customerViewDesigns.py")
     button_values = {}
     response = response.json()
     if response['total_price'] == 0:
@@ -66,7 +65,7 @@ def view_cart():
                 response = response.json()
                 if response['status'] == 'successfully change quantity':
                     st.success('Quantity updated successfully')
-                st.switch_page("pages/viewCart.py")
+                st.switch_page("pages/customerViewCart.py")
         st.subheader(f'Cart Total: Rs. {response["total_price"]}')
         st.write('---')
         if st.button('Proceed to Checkout'):
@@ -79,14 +78,16 @@ def view_cart():
             st.success('Estimated delivery date: ' + date)
             sleep(1)
             # redirect('view_designs')
-            st.switch_page("pages/viewDesigns.py")
+            st.switch_page("pages/customerViewDesigns.py")
 
 
 if __name__ == '__main__':
     view_cart()
     if st.button('Logout'):
-        for key in st.session_state.keys():
-            del st.session_state[key]
+        response = requests.post('http://localhost:8000/customer/logout', json={
+            'customer_id': st.session_state['customer_id']
+        })
+        del st.session_state['customer_id']
         st.success('Logged out successfully')
         sleep(1)
-        st.switch_page('your_app.py')
+        st.switch_page('home.py')

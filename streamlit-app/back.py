@@ -76,32 +76,18 @@ def customer_login():
     if user:
         if user[3] == 'deleted':
             return jsonify({"status": "account has been deleted"}), 400
-        session['user_id'] = user[0]
-        print(f"User id: {session['user_id']}", file=sys.stderr)
         user_id = user[0]
-        query = f"""
-            SELECT * FROM ImaginInk.customer WHERE customer_id = {user_id};
-        """
         cur = mysql.connection.cursor()
-        cur.execute(query)
-        customer = cur.fetchone()
         query = f"""
-            SELECT * FROM ImaginInk.user WHERE user_id = {user_id};
+            UPDATE ImaginInk.user
+            SET account_status = 'logged_in'
+            WHERE user_id = {user_id};
         """
         cur.execute(query)
-        user = cur.fetchone()
+        mysql.connection.commit()
         cur.close()
-        user_details = {
-            "address": customer[1],
-            "username": user[3],
-            "email_id": user[1],
-            "full_name": user[5],
-            "payment_method": user[9],
-            "registration_date": user[6],
-            "user_id": user_id
-        }
-        print(session, file=sys.stderr)
-        return jsonify({"status": "successfully logged in", "user": user_details}), 200
+        return jsonify({"status": "successfully logged in",
+                        "user_id": user_id}), 200
     else:
         return jsonify({"status": "invalid credentials"}), 200
     
@@ -156,11 +142,6 @@ def customer_cart():
 
 @app.route('/customer/view_designs', methods=['POST'])
 def customer_view_designs():
-    # if 'user_id' not in session:
-    #     print("No user id", file=sys.stderr)
-    #     return jsonify({"status": "user not logged in"}), 400
-    # user_id = session['user_id']
-    # print(user_id, file=sys.stderr)
     query = f"""
         SELECT * FROM design
         WHERE status = 'visible';
@@ -168,17 +149,54 @@ def customer_view_designs():
     cur = mysql.connection.cursor()
     cur.execute(query)
     designs = cur.fetchall()
+    query = f"""
+        SELECT d.design_id, t.tag_name
+        FROM ImaginInk.design d
+        JOIN ImaginInk.design_tags dt ON d.design_id = dt.design_id
+        JOIN ImaginInk.tag t ON t.tag_id = dt.tag_id
+        WHERE d.status = 'visible';
+    """
+    cur.execute(query)
+    tags = cur.fetchall()
+    query = f"""
+        SELECT tag_name
+        FROM ImaginInk.tag
+    """
+    cur.execute(query)
+    all_tags = cur.fetchall()
     cur.close()
+    design_details = {}
+    for design in designs:
+        design_details[design[0]] = {
+            "title": design[2],
+            "description": design[3],
+            "price": design[6],
+            "design_id": design[0],
+            "tags": []
+        }
+    for tag in tags:
+        design_details[tag[0]]['tags'].append(tag[1])
+    tag_list = []
+    for tag in all_tags:
+        tag_list.append(tag[0])
     design_ids = []
     design_titles = []
     design_prices = []
     design_description = []
-    for design in designs:
-        design_ids.append(design[0])
-        design_titles.append(design[2])
-        design_prices.append(design[6])
-        design_description.append(design[3])
-    return jsonify({"status": "successfully fetched designs", "design_ids": design_ids, "design_titles": design_titles, "design_prices": design_prices, "design_descriptions": design_description}), 200
+    design_tags = []
+    for design in design_details:
+        design_ids.append(design)
+        design_titles.append(design_details[design]['title'])
+        design_prices.append(design_details[design]['price'])
+        design_description.append(design_details[design]['description'])
+        design_tags.append(design_details[design]['tags'])
+    return jsonify({"status": "successfully fetched designs", 
+                    "design_ids": design_ids, 
+                    "design_titles": design_titles, 
+                    "design_prices": design_prices, 
+                    "design_descriptions": design_description,
+                    "design_tags": design_tags,
+                    "tag_list": tag_list}), 200
 
 @app.route('/customer/view_products', methods=['POST'])
 def customer_view_products():
@@ -201,21 +219,6 @@ def customer_view_products():
             "product_ids": product_ids, 
             "product_titles": product_titles, 
             "product_prices": product_prices}), 200
-    
-@app.route('/customer/select_design', methods=['POST'])
-def customer_select_design():
-    if 'user_id' not in session:
-        return {"status": "user not logged in"}
-    session['design_id'] = request.form['design_id']
-    return {"status": "successfully selected design"}
-
-
-@app.route('/customer/select_product', methods=['POST'])
-def customer_select_product():
-    if 'user_id' not in session:
-        return {"status": "user not logged in"}
-    session['product_id'] = request.form['product_id']
-    return {"status": "successfully selected product"}
 
 @app.route('/customer/add_to_cart', methods=['POST'])
 def customer_add_to_cart():
@@ -294,32 +297,6 @@ def customer_change_item_quantity():
     cur.close()
     return jsonify({"status": "successfully changed quantity"}), 200
 
-@app.route('/customer/decrease_item_quantity', methods=['POST'])
-def customer_decrease_item_quantity():
-    if 'user_id' not in session:
-        return {"status": "user not logged in"}
-    user_id = session['user_id']
-    design_id = request.form['design_id']
-    product_id = request.form['product_id']
-    cur = mysql.connection.cursor()
-    if 'cart_id' not in session:
-        query = f"""
-            SELECT cart_id FROM ImaginInk.carry WHERE customer_id = {user_id};
-        """
-        cur.execute(query)
-        cart_id = cur.fetchone()
-        session['cart_id'] = cart_id[0]
-    cart_id = session['cart_id']
-    query = f"""
-        UPDATE cart_items
-            SET quantity = quantity - 1
-        WHERE cart_id = {cart_id} AND design_id = {design_id} AND product_id = {product_id};
-    """
-    cur.execute(query)
-    mysql.connection.commit()
-    cur.close()
-    return {"status": "successfully decreased quantity"}
-
 @app.route('/customer/place_order', methods=['POST'])
 def customer_place_order():
     details = request.json
@@ -353,15 +330,108 @@ def customer_place_order():
     cur.close()
     return jsonify({"status": "successfully placed order"}), 200
 
-@app.route('/customer/logout')
+@app.route('/customer/order_history', methods=['POST'])
+def customer_order_history():
+    user_id = request.json['customer_id']
+    cur = mysql.connection.cursor()
+    query = f"""
+        UPDATE ImaginInk.order o
+            SET o.delivery_status = 
+                CASE
+                    WHEN TO_DAYS(CURDATE()) - TO_DAYS(o.delivery_date) > -1 THEN 'delivered'
+                    WHEN TO_DAYS(CURDATE()) - TO_DAYS(o.order_date) > 1 THEN 'shipped'
+                    ELSE 'pending'
+                END;
+    """
+    cur.execute(query)
+    query = f"""
+        SELECT o.order_id, o.order_date, o.delivery_date, o.delivery_status, ci.product_id, ci.design_id, ci.quantity, ci.price, p.title, d.title
+        FROM customer c
+        JOIN view_history vh ON c.customer_id = vh.customer_id
+        JOIN ImaginInk.order o ON vh.order_id = o.order_id
+        JOIN ImaginInk.checkout co ON o.order_id = co.order_id
+        JOIN ImaginInk.shopping_cart sc ON co.cart_id = sc.cart_id
+        JOIN cart_items ci ON ci.cart_id = sc.cart_id
+        JOIN product p ON p.product_id = ci.product_id
+        JOIN design d ON d.design_id = ci.design_id
+        WHERE c.customer_id = {user_id}
+        ORDER BY o.order_id DESC;
+    """
+    cur.execute(query)
+    mysql.connection.commit()
+    orders = cur.fetchall()
+    cur.close()
+    order_details = {}
+    for order in orders:
+        order_id = order[0]
+        if order_id not in order_details:
+            order_details[order_id] = {
+                "design_ids": [],
+                "product_ids": [],
+                "quantities": [],
+                "prices": [],
+                "grand_total": 0,
+                "product_titles": [],
+                "design_titles": []
+            }
+        order_details[order_id]["order_date"] = order[1]
+        order_details[order_id]["delivery_date"] = order[2]
+        order_details[order_id]["delivery_status"] = order[3]
+        order_details[order_id]["product_ids"].append(order[4])
+        order_details[order_id]["design_ids"].append(order[5])
+        order_details[order_id]["quantities"].append(order[6])
+        order_details[order_id]["prices"].append(order[7])
+        order_details[order_id]["product_titles"].append(order[8])
+        order_details[order_id]["design_titles"].append(order[9])
+        order_details[order_id]["grand_total"] += order[7]
+        
+    order_ids = []
+    order_dates = []
+    delivery_dates = []
+    delivery_statuses = []
+    items = []
+    grand_totals = []
+    for order in order_details:
+        order_ids.append(order)
+        order_dates.append(order_details[order]["order_date"])
+        delivery_dates.append(order_details[order]["delivery_date"])
+        delivery_statuses.append(order_details[order]["delivery_status"])
+        curr_items = [
+            order_details[order]["design_ids"],
+            order_details[order]["product_ids"],
+            order_details[order]["quantities"],
+            order_details[order]["prices"],
+            order_details[order]["product_titles"],
+            order_details[order]["design_titles"]
+        ]
+        items.append(curr_items)
+        grand_totals.append(order_details[order]["grand_total"])
+    return jsonify({"status": "successfully fetched order history",
+            "order_ids": order_ids,
+            "order_dates": order_dates,
+            "delivery_dates": delivery_dates,
+            "delivery_statuses": delivery_statuses,
+            "items": items,
+            "grand_totals": grand_totals}), 200
+
+@app.route('/customer/logout', methods=['POST'])
 def customer_logout():
-    session.pop('user_id', None)
-    return {"status": "successfully logged out"}
+    user_id = request.json['customer_id']
+    cur = mysql.connection.cursor()
+    query = f"""
+        UPDATE ImaginInk.user
+        SET account_status = 'logged_out'
+        WHERE user_id = {user_id};
+    """
+    cur.execute(query)
+    mysql.connection.commit()
+    cur.close()
+    return jsonify({"status": "successfully logged out"}), 200
     
 @app.route('/artist/signup', methods=['POST'])
 def artist_signup():
-    user_details = request.form
-    email_id = user_details['email']
+    user_details = request.json
+    email_id = user_details['email_id']
     password = user_details['password']
     username = user_details['username']
     full_name = user_details['full_name']
@@ -380,14 +450,14 @@ def artist_signup():
         flag = False
     cur.close()
     if flag:
-        return {"status": "successfully signed up"}
+        return jsonify({"status": "success"}), 200
     else:
-        return {"status": "email already in use"}
+        return jsonify({"status": "email"}), 400
     
 @app.route('/artist/login', methods=['POST'])
 def artist_login():
-    user_details = request.form
-    email_id = user_details['email']
+    user_details = request.json
+    email_id = user_details['email_id']
     password = user_details['password']
     query = f"""
         SELECT * FROM ImaginInk.user WHERE email_id = '{email_id}' AND password = '{password}' AND account_type = 'artist';
@@ -398,84 +468,165 @@ def artist_login():
     cur.close()
     if user:
         if user[3] == 'deleted':
-            return {"status": "account has been deleted"}
-        session['user_id'] = user[0]
+            return jsonify({"status": "account has been deleted"}), 400
         user_id = user[0]
-        query = f"""
-            SELECT * FROM ImaginInk.artist WHERE artist_id = {user_id};
-        """
         cur = mysql.connection.cursor()
-        cur.execute(query)
-        artist = cur.fetchone()
         query = f"""
-            SELECT * FROM ImaginInk.user WHERE user_id = {user_id};
+            UPDATE ImaginInk.user
+            SET account_status = 'logged_in'
+            WHERE user_id = {user_id};
         """
         cur.execute(query)
-        user = cur.fetchone()
+        mysql.connection.commit()
         cur.close()
-        user_details = {
-            "username": user[3],
-            "email_id": user[1],
-            "full_name": user[5],
-            "payment_method": user[9],
-            "registration_date": user[6],
-        }
-        return {"status": "successfully logged in", "user": user_details}
+        return jsonify({"status": "successfully logged in", "artist_id": user_id}), 200
     else:
-        return {"status": "invalid credentials"}
+        return jsonify({"status": "invalid credentials"}), 400
     
-@app.route('/artist/view_designs')
-def artist_view_designs():
-    if 'user_id' not in session:
-        return {"status": "user not logged in"}
-    user_id = session['user_id']
+@app.route('/artist/dashboard', methods=['POST'])
+def artist_dashboard():
+    user_id = request.json['artist_id']
+    cur = mysql.connection.cursor()
     query = f"""
-        SELECT * FROM design
-        WHERE artist_id = {user_id};
+        SELECT title, description, creation_date, price, sales_count, views_count, status
+        FROM ImaginInk.design d
+        WHERE d.artist_id = {user_id};
+    """
+    cur.execute(query)
+    designs = cur.fetchall()
+    cur.close()
+    design_titles = []
+    design_descriptions = []
+    creation_dates = []
+    prices = []
+    sales_counts = []
+    views_counts = []
+    statuses = []
+    revenues = []
+    for design in designs:
+        design_titles.append(design[0])
+        design_descriptions.append(design[1])
+        creation_dates.append(design[2])
+        prices.append(design[3])
+        sales_counts.append(design[4])
+        views_counts.append(design[5])
+        statuses.append(design[6])
+        revenues.append(design[3] * design[4])
+    return jsonify({"status": "successfully fetched designs",
+                    "design_titles": design_titles,
+                    "design_descriptions": design_descriptions,
+                    "creation_dates": creation_dates,
+                    "prices": prices,
+                    "sales_counts": sales_counts,
+                    "views_counts": views_counts,
+                    "statuses": statuses,
+                    "revenues": revenues}), 200
+    
+@app.route('/artist/view_designs', methods=['POST'])
+def artist_view_designs():
+    details = request.json
+    user_id = details['artist_id']
+    print(user_id, file=sys.stderr)
+    query = f"""
+        SELECT * 
+        FROM ImaginInk.design
+        WHERE artist_id = {user_id}
+        AND status <> 'deleted';
     """
     cur = mysql.connection.cursor()
     cur.execute(query)
     designs = cur.fetchall()
     cur.close()
-    user_designs = {}
+    design_ids = []
+    titles = []
+    descriptions = []
+    creation_dates = []
+    prices = []
+    sales_counts = []
+    views_counts = []
+    statuses = []
     for design in designs:
-        user_designs[design[0]] = {
-            "title": design[2],
-            "description": design[3],
-            "image": design[4],
-            "creation_date": design[5],
-            "price": design[6],
-            "sales_count": design[7],
-            "views_count": design[8],
-            "status": design[9]
-        }
-    return {"status": "successfully fetched designs", "designs": user_designs}
-
-@app.route('/artist/upload_design', methods=['POST'])
-def artist_upload_design():
-    if 'user_id' not in session:
-        return {"status": "user not logged in"}
-    user_id = session['user_id']
-    design_details = request.form
-    title = design_details['title']
-    description = design_details['description']
-    image = design_details['image']
-    price = design_details['price']
-    date = str(datetime.now().date())
+        design_ids.append(design[0])
+        titles.append(design[2])
+        descriptions.append(design[3])
+        creation_dates.append(design[5])
+        prices.append(design[6])
+        sales_counts.append(design[7])
+        views_counts.append(design[8])
+        statuses.append(design[9])
+    print('here', file=sys.stderr)
+    return jsonify({"status": "successfully fetched designs",
+                    "design_ids": design_ids,
+                    "titles": titles,
+                    "descriptions": descriptions,
+                    "creation_dates": creation_dates,
+                    "prices": prices,
+                    "sales_counts": sales_counts,
+                    "views_counts": views_counts,
+                    "statuses": statuses}), 200
+    
+@app.route('/artist/update_status', methods=['POST'])
+def artist_update_status():
+    details = request.json
+    user_id = details['artist_id']
+    design_id = details['design_id']
+    action = details['action']
+    if action == 'hide':
+        status = 'hidden'
+    elif action == 'show':
+        status = 'visible'
+    else:
+        status = 'deleted'
     query = f"""
-        INSERT INTO ImaginInk.design(artist_id, title, description, image, creation_date, price) VALUES
-        ({user_id}, '{title}', '{description}', '{image}', '{date}', {price});
+        UPDATE design
+            SET status = '{status}'
+        WHERE artist_id = {user_id}
+        AND design_id = {design_id};
     """
     cur = mysql.connection.cursor()
     cur.execute(query)
     mysql.connection.commit()
     cur.close()
-    return {"status": "successfully uploaded design"}
+    return jsonify({"status": "successfully updated status"}), 200
 
-@app.route('/artist/logout')
+@app.route('/artist/upload_design', methods=['POST'])
+def artist_upload_design():
+    design_details = request.json
+    title = design_details['title']
+    description = design_details['description']
+    price = design_details['price']
+    artist_id = design_details['artist_id']
+    image = 'image.jpg'
+    date = str(datetime.now().date())
+    query = f"""
+        INSERT INTO ImaginInk.design(artist_id, title, description, image, creation_date, price) VALUES
+        ({artist_id}, '{title}', '{description}', '{image}', '{date}', {price});
+    """
+    cur = mysql.connection.cursor()
+    cur.execute(query)
+    mysql.connection.commit()
+    query = f"""
+        SELECT LAST_INSERT_ID();
+    """
+    cur.execute(query)
+    design_id = cur.fetchone()[0]
+    cur.close()
+    return jsonify({"status": "design uploaded",
+                    "design_id": design_id}), 200
+
+@app.route('/artist/logout', methods=['POST'])
 def artist_logout():
-    session.pop('user_id', None)
-    return {"status": "successfully logged out"}
+    user_id = request.json['artist_id']
+    cur = mysql.connection.cursor()
+    query = f"""
+        UPDATE ImaginInk.user
+        SET account_status = 'logged_out'
+        WHERE user_id = {user_id};
+    """
+    cur.execute(query)
+    mysql.connection.commit()
+    cur.close()
+    return jsonify({"status": "successfully logged out"}), 200
 
 @app.route('/admin/login', methods=['POST'])
 def admin_login():
@@ -763,140 +914,6 @@ def admin_view_products():
                     "product_prices": product_prices,
                     "total_sales": product_sales,
                     "total_revenues": product_revenues}), 200
-
-# @app.route('/', methods=['GET', 'POST'])
-# def home_page():
-#     return render_template('home.html')
-
-# @app.route('/customer/signup', methods=['GET', 'POST'])
-# def customer_signup():
-#     msg = ""
-#     if request.method == 'POST':
-#         user_details = request.form
-#         email_id = user_details['email']
-#         password = user_details['password']
-#         username = user_details['username']
-#         full_name = user_details['full_name']
-#         payment_method = user_details['payment_method']
-#         methods = {"creditcard": "Credit Card", "paytm": "PayTM", "googlepay": "Google Pay", "banktransfer": "Bank Transfer"}
-#         address = user_details['address']
-#         payment_method = methods[payment_method]
-#         date = str(datetime.now().date())
-#         query = f"""
-#             INSERT INTO ImaginInk.user (email_id, password, username, account_status, full_name, registration_date, last_login_date, account_type, payment_method) VALUES
-#             ('{email_id}', '{password}', '{username}', 'logged_in', '{full_name}', '{date}', '{date}', 'customer', '{payment_method}')
-#         """
-#         cur = mysql.connection.cursor()
-#         cur.execute(query)
-#         query = f"""
-#             UPDATE ImaginInk.customer c
-#             JOIN ImaginInk.user u ON c.customer_id = u.user_id
-#             SET address = '{address}'
-#             WHERE u.email_id = '{email_id}'
-#             AND u.account_type = 'customer';
-#         """
-#         cur.execute(query)
-#         mysql.connection.commit()
-#         cur.close()
-#     return render_template('customer/signup.html', msg=msg)
-
-# @app.route('/artist/signup', methods=['GET', 'POST'])
-# def artist_signup():
-#     msg = ""
-#     if request.method == 'POST':
-#         user_details = request.form
-#         email_id = user_details['email']
-#         password = user_details['password']
-#         username = user_details['username']
-#         full_name = user_details['full_name']
-#         payment_method = user_details['payment_method']
-#         methods = {"creditcard": "Credit Card", "paytm": "PayTM", "googlepay": "Google Pay", "banktransfer": "Bank Transfer"}
-#         payment_method = methods[payment_method]
-#         date = str(datetime.now().date())
-#         query = f"""
-#             INSERT INTO ImaginInk.user (email_id, password, username, account_status, full_name, registration_date, last_login_date, account_type, payment_method) VALUES
-#             ('{email_id}', '{password}', '{username}', 'logged_in', '{full_name}', '{date}', '{date}', 'artist', '{payment_method}')
-#         """
-#         cur = mysql.connection.cursor()
-#         cur.execute(query)
-#         mysql.connection.commit()
-#         cur.close()
-#     return render_template('artist/signup.html', msg=msg)
-
-# @app.route('/customer/login', methods=['GET', 'POST'])
-# def customer_login():
-#     if request.method == 'POST':
-#         user_details = request.form
-#         email_id = user_details['email']
-#         password = user_details['password']
-#         query = f"""
-#             SELECT * FROM ImaginInk.user WHERE email_id = '{email_id}' AND password = '{password}' AND account_type = 'customer';
-#         """
-#         cur = mysql.connection.cursor()
-#         cur.execute(query)
-#         user = cur.fetchone()
-#         cur.close()
-#         if user:
-#             if user[3] == 'deleted':
-#                 return render_template('customer/login.html', msg="Account has been deleted")
-#             session['user_id'] = user[0]
-#             user_id = user[0]
-#             query = f"""
-#                 SELECT * FROM ImaginInk.customer WHERE customer_id = {user_id};
-#             """
-#             cur = mysql.connection.cursor()
-#             cur.execute(query)
-#             customer = cur.fetchone()
-#             query = f"""
-#                 SELECT * FROM ImaginInk.user WHERE user_id = {user_id};
-#             """
-#             cur.execute(query)
-#             user = cur.fetchone()
-#             cur.close()
-#             user_details = {
-#                 "address": customer[1],
-#                 "username": user[3],
-#                 "email_id": user[1],
-#                 "full_name": user[5],
-#                 "payment_method": user[9],
-#                 "registration_date": user[6],
-#             }
-#             return render_template('customer/dashboard.html', user=user_details)
-#         else:
-#             return render_template('customer/login.html', msg="Invalid Credentials")
-#     return render_template('customer/login.html')
-
-# @app.route('/customer/dashboard', methods=['GET', 'POST'])
-# def customer_dashboard():
-#     if 'user_id' not in session:
-#         return redirect(url_for('customer_login'))
-#     user_id = session['user_id']
-#     query = f"""
-#         SELECT * FROM ImaginInk.customer WHERE customer_id = {user_id};
-#     """
-#     cur = mysql.connection.cursor()
-#     cur.execute(query)
-#     customer = cur.fetchone()
-#     query = f"""
-#         SELECT * FROM ImaginInk.user WHERE user_id = {user_id};
-#     """
-#     cur.execute(query)
-#     user = cur.fetchone()
-#     cur.close()
-#     user_details = {
-#         "address": customer[1],
-#         "username": user[3],
-#         "email_id": user[1],
-#         "full_name": user[5],
-#         "payment_method": user[9],
-#         "registration_date": user[6],
-#     }
-#     return render_template('customer/dashboard.html', user=user_details)
-
-# # @app.route('/artist/login', methods=['GET', 'POST'])
-# # def artist_login():
-    
-    
 
 if __name__ == '__main__':
     app.run(host='localhost', port=8000, debug=True)

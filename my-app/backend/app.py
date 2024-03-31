@@ -13,7 +13,7 @@ CORS(app)  # This will enable CORS for all routes
 
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'password'
+app.config['MYSQL_PASSWORD'] = 'banta259'
 app.config['MYSQL_DB'] = 'imaginink'
 
 mysql = MySQL(app)
@@ -151,12 +151,13 @@ def customer_cart():
         total_price += item[5]
         total_items += 1
     return {"status": "successfully fetched cart", "cart": user_cart, "total_price": total_price, "total_items": total_items}
-
 @app.route('/customer/view_designs', methods=['POST'])
 def customer_view_designs():
-    if 'user_id' not in session:
-        return {"status": "user not logged in"}
-    user_id = session['user_id']
+    # if 'user_id' not in session:
+    #     print("No user id", file=sys.stderr)
+    #     return jsonify({"status": "user not logged in"}), 400
+    # user_id = session['user_id']
+    # print(user_id, file=sys.stderr)
     query = f"""
         SELECT * FROM design
         WHERE status = 'visible';
@@ -165,21 +166,20 @@ def customer_view_designs():
     cur.execute(query)
     designs = cur.fetchall()
     cur.close()
-    user_designs = {}
+    design_ids = []
+    design_titles = []
+    design_prices = []
+    design_description = []
     for design in designs:
-        user_designs[design[0]] = {
-            "title": design[2],
-            "description": design[3],
-            "image": design[4],
-            "price": design[6]
-        }
-    return {"status": "successfully fetched designs", "designs": user_designs}
+        design_ids.append(design[0])
+        design_titles.append(design[2])
+        design_prices.append(design[6])
+        design_description.append(design[3])
+    return jsonify({"status": "successfully fetched designs", "design_ids": design_ids, "design_titles": design_titles, "design_prices": design_prices, "design_descriptions": design_description}), 200
+
 
 @app.route('/customer/view_products', methods=['POST'])
 def customer_view_products():
-    if 'user_id' not in session:
-        return {"status": "user not logged in"}
-    user_id = session['user_id']
     query = f"""
         SELECT * FROM product;
     """
@@ -187,15 +187,18 @@ def customer_view_products():
     cur.execute(query)
     products = cur.fetchall()
     cur.close()
-    user_products = {}
+    product_ids = []
+    product_titles = []
+    product_prices = []
+    product_dimensions = []
     for product in products:
-        user_products[product[0]] = {
-            "title": product[1],
-            "image": product[2],
-            "price": product[3],
-            "dimensions": product[4]
-        }
-    return {"status": "successfully fetched products", "products": user_products}
+        product_ids.append(product[0])
+        product_titles.append(product[1])
+        product_prices.append(product[3])
+    return jsonify({"status": "successfully fetched products", 
+            "product_ids": product_ids, 
+            "product_titles": product_titles, 
+            "product_prices": product_prices}), 200
     
 @app.route('/customer/select_design', methods=['POST'])
 def customer_select_design():

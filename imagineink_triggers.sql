@@ -41,7 +41,7 @@ BEGIN
 	UPDATE ImaginInk.shopping_cart
         SET total_items = total_items + 1
         WHERE cart_id = NEW.cart_id;
-END //
+END //  
 
 DELIMITER //
 CREATE TRIGGER update_cart_item BEFORE UPDATE ON ImaginInk.cart_items

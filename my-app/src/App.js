@@ -1,9 +1,12 @@
-
-import './App.css';
+// import './App.css';
+import { lazy,Suspense } from 'react';
+import "bootstrap/dist/css/bootstrap.min.css";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from './components/Login';
 import Navbar from './components/Navbar';
 import Homepage from './components/Homepage';
-
+import Footer from './components/Footer/Footer';
+import Loader from './components/Loader/Loader';
 
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import SignUp from './components/SignUp';
@@ -29,11 +32,11 @@ function App() {
     // },
   ])
   return (
-    <>
+    <Suspense fallback={<Loader />}>
     {/* <SignUp
     ></SignUp> */}
     {/* <Homepage></Homepage> */}
-  <RouterProvider router={router} />
+      <RouterProvider router={router} />
 
 
 
@@ -49,7 +52,8 @@ function App() {
         </Route>
       </Switch>
     </Router> */}
-    </>
+    <Footer />
+    </Suspense>
 
 
 // <>
@@ -78,6 +82,7 @@ function App() {
 //   </div>
 // </BrowserRouter>
 // </>
+    
   );
 }
 

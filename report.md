@@ -574,7 +574,7 @@ WHERE
 
 ## Triggers
 --- 
-- 
+- Adds a row to the artist and customer table when a new user signs up.
 ```SQL
 DELIMITER // 
 CREATE TRIGGER trg_insert_user AFTER INSERT ON ImaginInk.user
@@ -589,7 +589,7 @@ BEGIN
     END IF;
 END //
 ```
-- 
+- Increments the tag usage count when a design is linked to a tag
 ```SQL
 DELIMITER //
 CREATE TRIGGER trg_add_design_tag AFTER INSERT ON ImaginInk.design_tags
@@ -600,7 +600,7 @@ BEGIN
     WHERE tag_id = NEW.tag_id;
 END //
 ```
-- 
+- Decrements the tag usage count when a design is unlinked from a tag
 ```SQL
 DELIMITER //
 CREATE TRIGGER trg_remove_design_tag AFTER DELETE ON ImaginInk.design_tags
@@ -611,7 +611,7 @@ BEGIN
     WHERE tag_id = OLD.tag_id;
 END //
 ```
-- 
+- Updates the number of items and grand total of the shopping cart when a new item is selected by the customer
 ```SQL
 DELIMITER //
 CREATE TRIGGER add_cart_item AFTER INSERT ON ImaginInk.cart_items
@@ -625,7 +625,7 @@ BEGIN
         WHERE cart_id = NEW.cart_id;
 END //  
 ```
-- 
+- Updates the grand total of the shopping cart when the quantity of an item is changed
 ```SQL
 DELIMITER //
 CREATE TRIGGER update_cart_item BEFORE UPDATE ON ImaginInk.cart_items
@@ -643,7 +643,7 @@ BEGIN
     SET NEW.price = individual_price * NEW.quantity;
 END //
 ```
-- 
+- Updates the grand total and number of items in the shopping cart when an item is removed from the cart
 ```SQL
 DELIMITER //
 CREATE TRIGGER remove_cart_item AFTER DELETE ON ImaginInk.cart_items
@@ -657,7 +657,7 @@ BEGIN
         WHERE cart_id = OLD.cart_id;
 END //
 ```
-- 
+- Triggers a number of actions when a user places an order. It links the customer to the placed order through the view_history table, increases the sales counts of the designs and the products ordered and assigns a new empty shopping cart to the customer.
 ```SQL
 DELIMITER //
 CREATE TRIGGER place_order AFTER INSERT ON ImaginInk.checkout
@@ -686,7 +686,7 @@ BEGIN
         WHERE cart_id = NEW.cart_id;
 END //
 ```
-- 
+- Updates the status of the designs to 'deleted' when an admin deleted an artist
 ```SQL
 DELIMITER //
 CREATE TRIGGER remove_artist_designs AFTER UPDATE ON ImaginInk.user
@@ -696,6 +696,19 @@ BEGIN
         UPDATE ImaginInk.design
             SET status = 'deleted'
             WHERE artist_id = NEW.user_id;
+    END IF;
+END //
+```
+- Updates the items in the customers' current carts when the status of a design is set to 'hidden' or 'deleted'.
+```SQL
+DELIMITER //
+CREATE TRIGGER update_design_status AFTER UPDATE ON ImaginInk.design
+FOR EACH ROW
+BEGIN
+    IF NEW.status <> 'visible' THEN
+        DELETE FROM ImaginInk.cart_items
+            WHERE design_id = NEW.design_id
+            AND cart_id IN (SELECT cart_id FROM ImaginInk.carry);
     END IF;
 END //
 ```

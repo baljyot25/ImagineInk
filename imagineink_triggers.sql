@@ -109,3 +109,13 @@ BEGIN
     END IF;
 END //
 
+DELIMITER //
+CREATE TRIGGER update_design_status AFTER UPDATE ON ImaginInk.design
+FOR EACH ROW
+BEGIN
+    IF NEW.status <> 'visible' THEN
+        DELETE FROM ImaginInk.cart_items
+            WHERE design_id = NEW.design_id
+            AND cart_id IN (SELECT cart_id FROM ImaginInk.carry);
+    END IF;
+END //

@@ -74,7 +74,7 @@ def customer_login():
     user = cur.fetchone()
     cur.close()
     if user:
-        if user[3] == 'deleted':
+        if user[4] == 'deleted':
             return jsonify({"status": "account has been deleted"}), 400
         user_id = user[0]
         cur = mysql.connection.cursor()
@@ -467,7 +467,7 @@ def artist_login():
     user = cur.fetchone()
     cur.close()
     if user:
-        if user[3] == 'deleted':
+        if user[4] == 'deleted':
             return jsonify({"status": "account has been deleted"}), 400
         user_id = user[0]
         cur = mysql.connection.cursor()
@@ -914,6 +914,55 @@ def admin_view_products():
                     "product_prices": product_prices,
                     "total_sales": product_sales,
                     "total_revenues": product_revenues}), 200
+
+@app.route('/admin/delete_user', methods=['POST'])
+def admin_delete_user():
+    details = request.json
+    user_id = details['user_id']
+    account_type = details['account_type']
+    query = f"""
+        SELECT * FROM ImaginInk.user WHERE account_type = '{account_type}' AND user_id = {user_id};
+    """
+    cur = mysql.connection.cursor()
+    cur.execute(query)
+    user = cur.fetchone()
+    cur.close()
+    if not user:
+        return jsonify({"status": "User not found"}), 400
+    query = f"""
+        UPDATE ImaginInk.user
+        SET account_status = 'deleted'
+        WHERE account_type = '{account_type}' AND user_id = {user_id};
+    """
+    cur = mysql.connection.cursor()
+    cur.execute(query)
+    mysql.connection.commit()
+    cur.close()
+    return jsonify({"status": "success"}), 200
+
+@app.route('/admin/delete_design', methods=['POST'])
+def admin_delete_design():
+    details = request.json
+    design_id = details['design_id']
+    query = f"""
+        SELECT * FROM ImaginInk.design WHERE design_id = {design_id};
+    """
+    cur = mysql.connection.cursor()
+    cur.execute(query)
+    design = cur.fetchone()
+    cur.close()
+    if not design:
+        return jsonify({"status": "Design not found"}), 400
+    query = f"""
+        UPDATE ImaginInk.design
+        SET status = 'deleted'
+        WHERE design_id = {design_id};
+    """
+    cur = mysql.connection.cursor()
+    cur.execute(query)
+    mysql.connection.commit()
+    cur.close()
+    return jsonify({"status": "success"}), 200
 
 if __name__ == '__main__':
     app.run(host='localhost', port=8000, debug=True)

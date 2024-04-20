@@ -54,34 +54,24 @@ The platform is designed to support both emerging and established talent, provid
 	  A virtual cart system where customers can review and manage their selected items, following which they can proceed to checkout to finalise their items.
 	- **Make Payment:**
 	  Seamless and secure payment options to complete the purchasing process efficiently.
-	- **Leave a review:**
-	  Customers can share their feedback and experiences, contributing to the community and helping artists improve.
-	- **Report:**
-	  Customers would be able to report designs containing offensive content or those that infringe upon intellectual property rights.
 
 - **Artist:**
 	- **Login/Signup:**
 	  Artists will have the option to create a new account or log in to an already existing account, while ensuring that each email address is uniquely linked to a single account.
 	- **Upload Design:**
-	  Artists would be able to upload their designs to the database, specify their price, and label the product with appropriate tags.
+	  Artists would be able to upload their designs to the database, specifying their price.
 	- **Receive payment:**
 	  Artists would be compensated on a commission basis for each sale of their respective products.
-	- **Artist help:**
-	  Artists can seek assistance for navigating the platform and addressing any issues they encounter.
 	- **View user analytics:**
-	  Artists would be able to view how many times their design was viewed, number of search appearances, and the number of sales.
+	  Artists would be able to view the analysis of their own designs.
 
 - **Admin:**
-	- **Add/Remove accounts:**
-	  Admins would have the ability to add or remove customer and artist accounts.
-	- **Manage reports:**
-	  Admins would be able to view reports raised by customers and artists and subsequently take appropriate actions in order to resolve the highlighted issues.
+	- **Manage accounts:**
+	  Admins would have the ability to view all customers and artists and delete their accounts.
 	- **Manage designs:**
-	  Admins will have the option to view all uploaded designs and modify or remove the product.
+	  Admins will have the option to view all uploaded designs and remove the designs.
 	- **View analytics:**
-	  Admins would be able to view both customer and artist analytics, such as the number of customer and artist accounts, trending search queries and top-selling products.
-	- **Due deliveries:**
-	  Admins would be able to monitor and manage the timely delivery of purchased prints to customers.
+	  Admins would be able to view both customer and artist analytics, such as the number of customer and artist accounts, along with the design and product analytics.
 
 ## Tech Stack
 ---

@@ -8,6 +8,26 @@ st.set_page_config(initial_sidebar_state="collapsed", layout='wide')
 
 def admin_view_artists():
     st.title('Artists')
+    artist_to_delete = st.text_input('Artist ID to Delete', type='default')
+    if st.button('Delete Artist'):
+        if artist_to_delete == '':
+            message = st.error('Enter ID to delete')
+        else:
+            try:
+                artist_to_delete = int(artist_to_delete)
+                response = requests.post('http://localhost:8000/admin/delete_user', json={
+                    'user_id': artist_to_delete, 
+                    'account_type': 'artist'
+                })
+                response = response.json()
+                if response['status'] == 'success':
+                    message = st.success('Artist deleted successfully')
+                else:
+                    message = st.error('Artist not found')
+            except:
+                message = st.error('Invalid ID')
+        sleep(1)
+        message.empty()
     response = requests.post('http://localhost:8000/admin/view_artists')
     response = response.json()
     data = {
@@ -52,6 +72,26 @@ def admin_view_artists():
 
 def admin_view_customers():
     st.title('Customers')
+    customer_to_delete = st.text_input('Customer ID to Delete', type='default')
+    if st.button('Delete Customer'):
+        if customer_to_delete == '':
+            message = st.error('Enter ID to delete')
+        else:
+            try:
+                customer_to_delete = int(customer_to_delete)
+                response = requests.post('http://localhost:8000/admin/delete_user', json={
+                    'user_id': customer_to_delete, 
+                    'account_type': 'customer'
+                })
+                response = response.json()
+                if response['status'] == 'success':
+                    message = st.success('Customer deleted successfully')
+                else:
+                    message = st.error('Customer not found')
+            except:
+                message = st.error('Invalid ID')
+        sleep(1)
+        message.empty()
     response = requests.post('http://localhost:8000/admin/view_customers')
     response = response.json()
     data = {
@@ -96,6 +136,25 @@ def admin_view_customers():
     
 def admin_view_designs():
     st.title('Designs')
+    design_to_delete = st.text_input('Design ID to Delete', type='default')
+    if st.button('Delete Design'):
+        if design_to_delete == '':
+            message = st.error('Enter ID to delete')
+        else:
+            try:
+                design_to_delete = int(design_to_delete)
+                response = requests.post('http://localhost:8000/admin/delete_design', json={
+                    'design_id': design_to_delete
+                })
+                response = response.json()
+                if response['status'] == 'success':
+                    message = st.success('Design deleted successfully')
+                else:
+                    message = st.error('Design not found')
+            except:
+                message = st.error('Invalid ID')
+        sleep(1)
+        message.empty()
     response = requests.post('http://localhost:8000/admin/view_designs')
     response = response.json()
     data = {

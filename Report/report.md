@@ -1,15 +1,40 @@
 # Project ImaginInk
-
+## Table of Contents
+---
+- [Project ImaginInk](#project-imaginink)
+  - [Table of Contents](#table-of-contents)
+  - [Contributors](#contributors)
+  - [Project Overview](#project-overview)
+  - [Objectives](#objectives)
+  - [Scope and Features](#scope-and-features)
+  - [Tech Stack](#tech-stack)
+  - [Entity-Relationship Diagram](#entity-relationship-diagram)
+  - [Relational Model](#relational-model)
+  - [Implementation of Schema](#implementation-of-schema)
+  - [Data Generation](#data-generation)
+  - [Data Population](#data-population)
+  - [SQL queries](#sql-queries)
+  - [Triggers](#triggers)
+  - [Transactions](#transactions)
+    - [Non-Conflicting Transactions](#non-conflicting-transactions)
+    - [Conflicting Transactions](#conflicting-transactions)
+  - [Workflows](#workflows)
+    - [User](#user)
+    - [Artist](#artist)
+    - [Admin](#admin)
 ## Contributors
 ---
 - Baljyot Singh Modi
 - Saurav Mehra
 - Kushagra Gupta
 - Mudit Bansal
+
 ## Project Overview
 ---
 "ImagineInk" aims to establish a user-friendly platform catering to small-scale designers. The platform facilitates the exhibition of designers' creations to a broader audience while
 simultaneously allowing customers to acquire their preferred prints. This initiative prioritises a seamless and secure payment and delivery process for users, contributing to artists' income generation.
+
+The platform is designed to support both emerging and established talent, providing a specialized space for art enthusiasts to explore and purchase unique designs. The project aims to foster a community of artists and customers, enabling artists to showcase their work and receive compensation for their creations. The platform also encourages customers to share their feedback and experiences, contributing to the community and helping artists improve.
 ## Objectives
 ---
 1. Create a platform for designers to showcase their work.
@@ -71,322 +96,223 @@ simultaneously allowing customers to acquire their preferred prints. This initia
 
 ## Relational Model
 ---
-**![](https://lh7-us.googleusercontent.com/2Q33hvtScEgEYdQ1XsFzY6kYyriNS5hyQUQyghdUMa2050Ou4kjfqL8lm8BzREyCmFkkKVeYmsQGoV57c_tECxiafWRrGY5sQJixHDqOGAVyR5hAelIDsjTD3cUcoKoKZsF1wWFouo9HlrLZUMICw2s)**
+![](Pasted%20image%2020240420223203.png)
 
 ## Implementation of Schema
 - Table `ImaginInk.users`
 ```SQL
-CREATE TABLE IF NOT EXISTS `ImaginInk`.`users` (
-  `user_id` INT NOT NULL AUTO_INCREMENT,
-  `email_id` VARCHAR(45) NOT NULL,
-  `password` VARCHAR(45) NOT NULL,
-  `username` VARCHAR(45) NOT NULL,
-  `address` VARCHAR(85) NOT NULL,
-  `account_status` VARCHAR(25) NOT NULL, -- deleted/logged in /logged out....
-  `full_name` VARCHAR(45) NOT NULL,
-  `registration_date` DATE NOT NULL DEFAULT (CURRENT_DATE),
-  `last_login_date` DATE NOT NULL DEFAULT (CURRENT_DATE),
-  `account_type` VARCHAR(20) NOT NULL,
-  PRIMARY KEY (`user_id`),
-  UNIQUE INDEX `email_id_UNIQUE` (`email_id` ASC) VISIBLE)
-ENGINE = InnoDB;
+CREATE TABLE IF NOT EXISTS ImaginInk.user (
+  user_id INT NOT NULL AUTO_INCREMENT,
+  email_id VARCHAR(45) NOT NULL,
+  password VARCHAR(45) NOT NULL,
+  username VARCHAR(45) NOT NULL,
+  account_status ENUM('logged_in', 'logged_out','deleted' ) NOT NULL,
+  full_name VARCHAR(45) NOT NULL,
+  registration_date DATE NOT NULL DEFAULT (CURRENT_DATE),	
+  last_login_date DATE NOT NULL DEFAULT (CURRENT_DATE),
+  account_type ENUM('customer', 'artist') NOT NULL,
+  payment_method ENUM('Credit Card', 'PayTM', 'Google Pay', 'Bank Transfer'),
+  PRIMARY KEY (user_id),
+  UNIQUE KEY unique_email_account_type (email_id, account_type),
+  CONSTRAINT chk_email_format CHECK (email_id LIKE '_%@_%.com')
+);	
 ```
 - Table `ImaginInk.customers`
 ```SQL
-CREATE TABLE IF NOT EXISTS `ImaginInk`.`customers` (
-  `customer_user_id` INT NOT NULL AUTO_INCREMENT,
-  `shipping_address` VARCHAR(45) NULL,
-  `payment_information` VARCHAR(45) NULL,
-  INDEX `user_id_idx` (`customer_user_id` ASC) VISIBLE,
-  PRIMARY KEY (`customer_user_id`),
-  CONSTRAINT `customer_user_id`
-    FOREIGN KEY (`customer_user_id`)
-    REFERENCES `ImaginInk`.`users` (`user_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
+CREATE TABLE ImaginInk.customer (
+  customer_id INT NOT NULL,
+  address VARCHAR(255) NOT NULL,
+  PRIMARY KEY (customer_id),
+  FOREIGN KEY (customer_id) REFERENCES ImaginInk.user (user_id)
+);
 ```
 - Table `ImaginInk.artists`
   ```SQL
-CREATE TABLE IF NOT EXISTS `ImaginInk`.`artists` (
-	`artist_user_id` INT NOT NULL,
-	`payment_information` VARCHAR(45) NULL,
-	INDEX `user_id_idx` (`artist_user_id` ASC) VISIBLE,
-	CONSTRAINT `artist_user_id`
-	FOREIGN KEY (`artist_user_id`)
-	REFERENCES `ImaginInk`.`users` (`user_id`)
-	ON DELETE NO ACTION
-	ON UPDATE NO ACTION)
-ENGINE = InnoDB;
+CREATE TABLE ImaginInk.artist (
+  artist_id INT NOT NULL,
+  PRIMARY KEY (artist_id),
+  FOREIGN KEY (artist_id) REFERENCES ImaginInk.user (user_id)
+);
 ```
 - Table `ImaginInk.designs`
 ```SQL
-CREATE TABLE IF NOT EXISTS `ImaginInk`.`designs` (
-  `design_id` INT NOT NULL AUTO_INCREMENT,
-  `designer_artist_id` INT NOT NULL,
-  `title` VARCHAR(45) NOT NULL,
-  `description` VARCHAR(100) NULL,
-  `image` BLOB NOT NULL,
-  `creation_date` DATE NULL DEFAULT (CURRENT_DATE),
-  `price` INT NOT NULL,
-  `sales_count` INT NULL,
-  `views_count` INT NULL,
-  `sales_revenue` INT NULL,
-  PRIMARY KEY (`design_id`),
-  UNIQUE INDEX `design_id_UNIQUE` (`design_id` ASC) VISIBLE,
-  INDEX `user_id_idx` (`designer_artist_id` ASC) VISIBLE,
-  CONSTRAINT `designer_artist_id`
-    FOREIGN KEY (`designer_artist_id`)
-    REFERENCES `ImaginInk`.`artists` (`artist_user_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
+CREATE TABLE ImaginInk.design (
+  design_id INT NOT NULL AUTO_INCREMENT,
+  artist_id INT NOT NULL,
+  title VARCHAR(45) NOT NULL,
+  description VARCHAR(100),
+  image BLOB NOT NULL,
+  creation_date DATE,
+  price INT NOT NULL,
+  sales_count INT DEFAULT 0,
+  views_count INT DEFAULT 0,
+  status ENUM('deleted','visible','hidden') NOT NULL default 'visible',
+  PRIMARY KEY (design_id),
+  FOREIGN KEY (artist_id) REFERENCES ImaginInk.artist (artist_id),
+  CONSTRAINT chk_design_price CHECK (price > 0)
+);
 ```
 - Table `ImaginInk.tags`
 ```SQL
-CREATE TABLE IF NOT EXISTS `ImaginInk`.`tags` (
-  `tag_id` INT NOT NULL AUTO_INCREMENT,
-  `tag_name` VARCHAR(45) NOT NULL,
-  `description` VARCHAR(45) NULL,
-  `usage_count` INT NULL,
-  PRIMARY KEY (`tag_id`),
-  UNIQUE INDEX `tag_name_UNIQUE` (`tag_name` ASC) VISIBLE)
-ENGINE = InnoDB;
+CREATE TABLE ImaginInk.tag (
+  tag_id INT NOT NULL AUTO_INCREMENT,
+  tag_name VARCHAR(45) NOT NULL,
+  description VARCHAR(45),
+  usage_count INT DEFAULT 0,
+  PRIMARY KEY (tag_id)
+);
 ```
 - Table `ImaginInk.design_tags`
 ```SQL
-CREATE TABLE IF NOT EXISTS `ImaginInk`.`design_tags` (
-  `design_tag_id` INT NOT NULL,
-  `design_id` INT NOT NULL,
-  -- `artist_id` INT NOT NULL; 
-  INDEX `design_id_idx` (`design_id` ASC) VISIBLE,
-  INDEX `tag_id_idx` (`design_tag_id` ASC) VISIBLE,
-  -- INDEX `artist_id_idx` (`artist_id` ASC) VISIBLE,
-  PRIMARY KEY (`design_tag_id`, `design_id`),-- , `artist_id`),
-  CONSTRAINT `design_id`
-    FOREIGN KEY (`design_id`)
-    REFERENCES `ImaginInk`.`designs` (`design_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `tag_id`
-    FOREIGN KEY (`design_tag_id`)
-    REFERENCES `ImaginInk`.`tags` (`tag_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-  -- CONSTRAINT `artist_id`
---     FOREIGN KEY (`artist_id`)
---     REFERENCES `ImaginInk`.`design` (`designer_artist_id`)
---     ON DELETE NO ACTION
---     ON UPDATE NO ACTION)
-ENGINE = InnoDB;
+CREATE TABLE ImaginInk.design_tags (
+  tag_id INT NOT NULL,
+  design_id INT NOT NULL,
+  PRIMARY KEY (tag_id, design_id),
+  FOREIGN KEY (design_id) REFERENCES ImaginInk.design (design_id),
+  FOREIGN KEY (tag_id) REFERENCES ImaginInk.tag (tag_id) 
+  ON DELETE CASCADE
+  ON UPDATE CASCADE
+);
 ```
 - Table `ImaginInk.artist_assist`
 ```SQL
-CREATE TABLE IF NOT EXISTS `ImaginInk`.`artist_assist` (
-  `request_id` INT NOT NULL AUTO_INCREMENT,
-  `request_date` DATE NULL DEFAULT (CURRENT_DATE),
-  `description` VARCHAR(100) NOT NULL,
-  `request_status` VARCHAR(10) NULL,
-  `request_closure_date` DATE NULL,
-  `request_artist_id` INT NOT NULL,
-  PRIMARY KEY (`request_id`),
-  INDEX `artist_user_id_idx` (`request_artist_id` ASC) VISIBLE,
-  CONSTRAINT `resuest_artist_id`
-    FOREIGN KEY (`request_artist_id`)
-    REFERENCES `ImaginInk`.`artists` (`artist_user_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
+CREATE TABLE ImaginInk.artist_assist (
+  request_id INT NOT NULL AUTO_INCREMENT,
+  request_date DATE DEFAULT (CURRENT_DATE),
+  description VARCHAR(100) NOT NULL,
+  request_status ENUM('pending', 'resolved') DEFAULT 'pending',
+  request_closure_date DATE,
+  artist_id INT NOT NULL,
+  PRIMARY KEY (request_id),
+  FOREIGN KEY (artist_id) REFERENCES ImaginInk.artist (artist_id)
+);
 ```
 - Table `ImaginInk.orders`
 ```SQL
-CREATE TABLE IF NOT EXISTS `ImaginInk`.`orders` (
-  `order_id` INT NOT NULL AUTO_INCREMENT,
-  `order_date` DATE NOT NULL,
-  `delivery_date` DATE NOT NULL,
-  `delivery_status` VARCHAR(10) NOT NULL,
-  PRIMARY KEY (`order_id`))
-ENGINE = InnoDB;
+CREATE TABLE ImaginInk.order (
+  order_id INT NOT NULL AUTO_INCREMENT,
+  order_date DATE NOT NULL,
+  delivery_date DATE NOT NULL,
+  delivery_status ENUM('shipped', 'pending', 'delivered') DEFAULT 'pending',
+  PRIMARY KEY (order_id)
+);
 ```
 - Table `ImaginInk.shopping_carts`
 ```SQL
-CREATE TABLE IF NOT EXISTS `ImaginInk`.`shopping_carts` (
-  `cart_id` INT NOT NULL AUTO_INCREMENT,
-  -- `user_id` INT NOT NULL,
-  `grand_total` INT NULL,
-  `total_items` INT NULL,
-  PRIMARY KEY (`cart_id`))
-ENGINE = InnoDB;
+CREATE TABLE ImaginInk.shopping_cart (
+  cart_id INT NOT NULL AUTO_INCREMENT,
+  grand_total INT DEFAULT 0,
+  total_items INT DEFAULT 0,
+  PRIMARY KEY (cart_id)
+);
 ```
 - Table `ImaginInk.products`
 ```SQL
-CREATE TABLE IF NOT EXISTS `ImaginInk`.`products` (
-  `product_id` INT NOT NULL AUTO_INCREMENT,
-  `title` VARCHAR(45) NOT NULL,
-  `image` BLOB NOT NULL,
-  `price` INT NOT NULL,
-  `sales_count` INT NULL,
-  `dimensions` VARCHAR(40) NOT NULL,
-  `sales_revenue` INT NULL,
-  PRIMARY KEY (`product_id`),
-  UNIQUE INDEX `title_UNIQUE` (`title` ASC) VISIBLE)
-ENGINE = InnoDB;
+CREATE TABLE ImaginInk.product (
+  product_id INT NOT NULL AUTO_INCREMENT,
+  title VARCHAR(45) NOT NULL,
+  image BLOB NOT NULL,
+  price INT NOT NULL,
+  sales_count INT DEFAULT 0,
+  dimensions ENUM('16x20', 'S, M, L, XL', 'Standard', 'Various', '18x24', 'A5', 'Set of 4') NOT NULL,
+  PRIMARY KEY (product_id),
+  CONSTRAINT chk_product_price CHECK (price > 0)
+);
 ```
 - Table `ImaginInk.cart_items`
 ```SQL
-CREATE TABLE IF NOT EXISTS `ImaginInk`.`cart_items` (
-  `shopping_cart_id` INT NOT NULL,
-  `product_item_id` INT NOT NULL,
-  `design_item_id` INT NOT NULL,
-  `quantity` INT NOT NULL,
-  `price` INT NOT NULL,
-  INDEX `product_item_id_idx` (`product_item_id` ASC) VISIBLE,
-  INDEX `design_item_id_idx` (`design_item_id` ASC) VISIBLE,
-  INDEX `cart_id_idx` (`shopping_cart_id` ASC) VISIBLE,
-  PRIMARY KEY (`shopping_cart_id`, `product_item_id`, `design_item_id`),
-  CONSTRAINT `product_item_id`
-    FOREIGN KEY (`product_item_id`)
-    REFERENCES `ImaginInk`.`products` (`product_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `design_item_id`
-    FOREIGN KEY (`design_item_id`)
-    REFERENCES `ImaginInk`.`designs` (`design_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `shopping_cart_id`
-    FOREIGN KEY (`shopping_cart_id`)
-    REFERENCES `ImaginInk`.`shopping_carts` (`cart_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
+CREATE TABLE ImaginInk.cart_items (
+  cart_id INT NOT NULL,
+  product_id INT NOT NULL,
+  design_id INT NOT NULL,
+  quantity INT NOT NULL,
+  price INT NOT NULL,
+  PRIMARY KEY (cart_id, product_id, design_id),
+  FOREIGN KEY (product_id) REFERENCES ImaginInk.product (product_id),
+  FOREIGN KEY (design_id) REFERENCES ImaginInk.design (design_id),
+  FOREIGN KEY (cart_id) REFERENCES ImaginInk.shopping_cart (cart_id)
+  ON DELETE CASCADE
+  ON UPDATE CASCADE
+);
 ```
 - Table `ImaginInk.reviews`
 ```SQL
-CREATE TABLE IF NOT EXISTS `ImaginInk`.`reviews` (
-  `review_id` INT NOT NULL AUTO_INCREMENT,
-  `reviewer_customer_id` INT NOT NULL,
-  `review_description` VARCHAR(45) NOT NULL,
-  `review_date` DATE NOT NULL,
-  PRIMARY KEY (`review_id`),
-  INDEX `user_id_idx` (`reviewer_customer_id` ASC) VISIBLE,
-  CONSTRAINT `reviewer_customer_id`
-    FOREIGN KEY (`reviewer_customer_id`)
-    REFERENCES `ImaginInk`.`customers` (`customer_user_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
+CREATE TABLE ImaginInk.review (
+  review_id INT NOT NULL AUTO_INCREMENT,
+  customer_id INT NOT NULL,
+  review_description VARCHAR(45) NOT NULL,
+  review_date DATE NOT NULL,
+  PRIMARY KEY (review_id),
+  FOREIGN KEY (customer_id) REFERENCES ImaginInk.customer (customer_id)
+);
 ```
 - Table `ImaginInk.reports`
 ```SQL
-CREATE TABLE IF NOT EXISTS `ImaginInk`.`reports` (
- --  `report_id` INT NOT NULL AUTO_INCREMENT,
-  `report_date` VARCHAR(45) NOT NULL,
-  `report_description` VARCHAR(45) NOT NULL,
-  `reporter_user_id` INT NOT NULL,
-  `reported_design_id` INT NOT NULL,
-  PRIMARY KEY (`reported_design_id` ,`reporter_user_id` ),
-  INDEX `reporter_user_id_idx` (`reporter_user_id` ASC) VISIBLE,
-  INDEX `reported_design_id_idx` (`reported_design_id` ASC) VISIBLE,
-  CONSTRAINT `reporter_user_id`
-    FOREIGN KEY (`reporter_user_id`)
-    REFERENCES `ImaginInk`.`users` (`user_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `reported_design_id`
-    FOREIGN KEY (`reported_design_id`)
-    REFERENCES `ImaginInk`.`designs` (`design_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
+CREATE TABLE ImaginInk.report (
+  report_date DATE NOT NULL,
+  report_description ENUM('Copyright violation', 'Hateful content') NOT NULL,
+  reporter_user_id INT NOT NULL,
+  reported_design_id INT NOT NULL,
+  PRIMARY KEY (reported_design_id, reporter_user_id),
+  FOREIGN KEY (reporter_user_id) REFERENCES ImaginInk.user (user_id),
+  FOREIGN KEY (reported_design_id) REFERENCES ImaginInk.design (design_id)
+);
 ```
 - Table `ImaginInk.admin`
 ```SQL
-CREATE TABLE IF NOT EXISTS `ImaginInk`.`admins` (
-  `admin_id` INT NOT NULL AUTO_INCREMENT,
-  `username` VARCHAR(45) NOT NULL,
-  `password` VARCHAR(45) NOT NULL,
-  PRIMARY KEY (`admin_id`))
-ENGINE = InnoDB;
+CREATE TABLE ImaginInk.admin (
+  admin_id INT NOT NULL AUTO_INCREMENT,
+  username VARCHAR(45) NOT NULL,
+  password VARCHAR(45) NOT NULL,
+  PRIMARY KEY (admin_id)
+);
 ```
 - Table `ImaginInk.view_history`
 ```SQL
-CREATE TABLE IF NOT EXISTS `ImaginInk`.`view_history` (
-  `history_order_id` INT NOT NULL,
-  `customer_id` INT NOT NULL,
-  PRIMARY KEY (`customer_id`, `history_order_id`),
-  CONSTRAINT `history_order_id`
-    FOREIGN KEY (`history_order_id`)
-    REFERENCES `ImaginInk`.`orders` (`order_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `history_customer_id`
-    FOREIGN KEY (`customer_id`)
-    REFERENCES `ImaginInk`.`customers` (`customer_user_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
+CREATE TABLE ImaginInk.view_history (
+  order_id INT NOT NULL,
+  customer_id INT NOT NULL,
+  PRIMARY KEY (customer_id, order_id),
+  FOREIGN KEY (order_id) REFERENCES ImaginInk.order (order_id),
+  FOREIGN KEY (customer_id) REFERENCES ImaginInk.customer (customer_id)
+);
 ```
 - Table `ImaginInk.carry`
 ```SQL
-CREATE TABLE IF NOT EXISTS `ImaginInk`.`carry` (
-  `carry_user_id` INT NOT NULL,
-  `carry_cart_id` INT NOT NULL,
-  PRIMARY KEY (`carry_user_id`, `carry_cart_id`),
-  INDEX `carry_customer_id_idx` (`carry_cart_id` ASC) VISIBLE,
-  CONSTRAINT `carry_user_id`
-    FOREIGN KEY (`carry_user_id`)
-    REFERENCES `ImaginInk`.`customers` (`customer_user_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `carry_customer_id`
-    FOREIGN KEY (`carry_cart_id`)
-    REFERENCES `ImaginInk`.`shopping_carts` (`cart_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
+CREATE TABLE ImaginInk.carry (
+  customer_id INT NOT NULL,
+  cart_id INT NOT NULL,
+  PRIMARY KEY (customer_id, cart_id),
+  FOREIGN KEY (customer_id) REFERENCES ImaginInk.customer (customer_id),
+  FOREIGN KEY (cart_id) REFERENCES ImaginInk.shopping_cart (cart_id)
+);
 ```
 - Table `ImaginInk.checkout`
 ```SQL
-CREATE TABLE IF NOT EXISTS `ImaginInk`.`checkout` (
-  `checkout_order_id` INT NOT NULL,
-  `checkout_cart_id` INT NOT NULL,
-  PRIMARY KEY (`checkout_order_id`, `checkout_cart_id`),
-  INDEX `checkout_cart_id_idx` (`checkout_cart_id` ASC) VISIBLE,
-  CONSTRAINT `checkout_order_id`
-    FOREIGN KEY (`checkout_order_id`)
-    REFERENCES `ImaginInk`.`orders` (`order_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `checkout_cart_id`
-    FOREIGN KEY (`checkout_cart_id`)
-    REFERENCES `ImaginInk`.`shopping_carts` (`cart_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
+CREATE TABLE ImaginInk.checkout (
+  order_id INT NOT NULL,
+  cart_id INT NOT NULL,
+  PRIMARY KEY (order_id, cart_id),
+  FOREIGN KEY (order_id) REFERENCES ImaginInk.order (order_id),
+  FOREIGN KEY (cart_id) REFERENCES ImaginInk.shopping_cart (cart_id)
+);
 ```
 - Table `ImaginInk.related_to`
 ```SQL
-CREATE TABLE IF NOT EXISTS `ImaginInk`.`relates_to` (
-  `related_review_id` INT NOT NULL,
-  `related_design_id` INT NOT NULL,
-  PRIMARY KEY (`related_review_id`, `related_design_id`),
-  INDEX `related_design_id_idx` (`related_design_id` ASC) VISIBLE,
-  CONSTRAINT `related_review_id`
-    FOREIGN KEY (`related_review_id`)
-    REFERENCES `ImaginInk`.`reviews` (`review_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `related_design_id`
-    FOREIGN KEY (`related_design_id`)
-    REFERENCES `ImaginInk`.`designs` (`design_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
+CREATE TABLE ImaginInk.review_relates_to (
+  review_id INT NOT NULL,
+  design_id INT NOT NULL,
+  PRIMARY KEY (review_id, design_id),
+  FOREIGN KEY (review_id) REFERENCES ImaginInk.review (review_id)
+  ON DELETE CASCADE  
+  ON UPDATE CASCADE,
+  FOREIGN KEY (design_id) REFERENCES ImaginInk.design (design_id)
+);
 ```
 ## Data Generation
 ---
 Majority of the data was generated with the use of large language models. We provided our database schema to the model and got the data to fill the database after which we made sure to follow integrity constraints while filling the data.
+
 ## Data Population
 ---
 All the tables of the database were pre-populated with data with integrity-constrains maintained to start querying. The database was populated with the following number of rows of data:
@@ -712,5 +638,173 @@ BEGIN
     END IF;
 END //
 ```
-
 ## Transactions
+---
+### Non-Conflicting Transactions
+---
+1. Two customers add the same items to their respective carts 
+   Non-conflicting since they read the same rows but write on independent rows
+```SQL
+START TRANSACTION;
+INSERT INTO ImaginInk.cart_items (cart_id, product_id, design_id, price, quantity) VALUES
+(16, 1, 1, 100, 1),
+(16, 1, 2, 110, 1);
+COMMIT;
+
+START TRANSACTION;
+INSERT INTO ImaginInk.cart_items(cart_id, product_id, design_id, price, quantity) VALUES
+(17, 1, 1, 100, 1),
+(17, 1, 2, 110, 1);
+COMMIT;
+```
+2. Adding a customer's review for a product that they have ordered, while another customer reports that design
+   Non-conflicting transactions since they operate on independent rows
+```SQL
+DROP PROCEDURE IF EXISTS add_review_transaction;
+DELIMITER //
+CREATE PROCEDURE add_review_transaction()
+BEGIN
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION ROLLBACK;
+
+	START TRANSACTION;
+	INSERT INTO ImaginInk.review (customer_id, review_description, review_date) VALUES
+	(1, 'Low quality', '2024-01-01');
+	INSERT INTO ImaginInk.review_relates_to (review_id, design_id) VALUES
+	(LAST_INSERT_ID(), 2);
+
+	SET @order_count = (SELECT COUNT(*)
+		FROM customer c
+		JOIN view_history vh ON c.customer_id = vh.customer_id
+		JOIN ImaginInk.order o ON vh.order_id = o.order_id
+		JOIN ImaginInk.checkout co ON o.order_id = co.order_id
+		JOIN ImaginInk.shopping_cart sc ON co.cart_id = sc.cart_id
+		JOIN cart_items ci ON ci.cart_id = sc.cart_id
+		WHERE c.customer_id = 1 AND ci.design_id = 2);
+	SELECT @order_count;
+	IF @order_count = 0 THEN ROLLBACK;
+	ELSE COMMIT;
+    END IF;
+END //
+DELIMITER ;
+CALL add_review_transaction;
+
+START TRANSACTION;
+INSERT INTO ImaginInk.report (report_date, report_description, reporter_user_id, reported_design_id) VALUES
+('2024-02-10', 'Copyright violation', 3, 1);
+COMMIT;
+```
+3. A customer adds items to their cart, while the admin tries to view design analytics
+   Non-conflicting since the sales count is not updated till the order has been placed, avoiding a read-write conflict
+```SQL
+START TRANSACTION;
+INSERT INTO ImaginInk.cart_items (cart_id, product_id, design_id, price, quantity) VALUES
+(17, 1, 1, 200, 2),
+(17, 1, 2, 330, 3);
+COMMIT;
+
+START TRANSACTION;
+SELECT
+    d.design_id,
+    d.title,
+    d.price,
+    d.sales_count,
+    d.views_count,
+    GROUP_CONCAT(t.tag_name) AS tags
+FROM
+    ImaginInk.design d
+LEFT JOIN
+    ImaginInk.design_tags dt ON d.design_id = dt.design_id
+LEFT JOIN
+    ImaginInk.tag t ON dt.tag_id = t.tag_id
+GROUP BY
+    d.design_id;
+COMMIT;
+```
+4. The artist requests for assistance using the artist assist tool and uploads a design
+   Non-conflicting transactions since they do not affect the same data
+```SQL
+START TRANSACTION;
+INSERT INTO ImaginInk.artist_assist (request_date, description, request_status, request_closure_date, artist_id) VALUES
+('2020-01-01', 'Unable to add tags', 'pending', NULL, 2);
+COMMIT;
+
+START TRANSACTION;
+INSERT INTO ImaginInk.design (artist_id, title, description, image, creation_date, price, sales_count, views_count) VALUES
+(2, 'Concrete Jungle', 'A cityscape of a bustling metropolis', 'concrete_jungle.jpg', '2020-01-01', 50, 0, 0);
+COMMIT;
+```
+### Conflicting Transactions
+---
+5. Two customers add the same items to their cart and place the order at the same time.  
+   Both the transactions would trigger a query to update the sales count of the designs and products
+   LAST_INSERT_ID() could also be modified by the other transaction
+   Conflict would occur if the transactions were not executed serially
+```SQL
+START TRANSACTION;
+INSERT INTO ImaginInk.cart_items (cart_id, product_id, quantity, price, design_id) VALUES
+(16, 1, 1, 100, 1);
+INSERT INTO ImaginInk.order(order_date, delivery_date) VALUES
+('2024-04-20', '2024-04-24');
+INSERT INTO ImaginInk.checkout (cart_id, order_id) VALUES
+(16, LAST_INSERT_ID());
+COMMIT;
+
+START TRANSACTION;
+INSERT INTO ImaginInk.cart_items (cart_id, product_id, quantity, price, design_id) VALUES
+(17, 1, 1, 100, 1);
+INSERT INTO ImaginInk.order(order_date, delivery_date) VALUES
+('2024-04-20', '2024-04-24');
+INSERT INTO ImaginInk.checkout (cart_id, order_id) VALUES
+(17, LAST_INSERT_ID());
+COMMIT;
+```
+6. Deleting the artist triggers a query to delete all their designs as well as remove them from the carts
+   Not executing these commands serially may allow the customer to add the deleted designs to their cart, causing conflict
+```SQL
+START TRANSACTION;
+UPDATE ImaginInk.user
+SET account_status = 'deleted'
+WHERE user_id = 2;
+COMMIT;
+
+START TRANSACTION;
+INSERT INTO ImaginInk.cart_items (cart_id, product_id, design_id, quantity, price) VALUES
+(16, 1, 1, 100, 1);
+COMMIT;
+```
+
+## Workflows
+---
+We have made a streamlitt application for the front-end of our project. It is a python library which provides tools for simple and easy to build user interfaces. The workflows of the different kinds of users are as follows along with their images.
+### User
+---
+- Login Page
+  ![](Pasted%20image%2020240420223729.png)
+- Home Page
+  ![](Pasted%20image%2020240420223800.png)
+- Products Page
+  ![](Pasted%20image%2020240420223841.png)
+- Cart
+  ![](Pasted%20image%2020240420223852.png)
+- Order History
+  ![](Pasted%20image%2020240420223909.png)
+### Artist
+---
+- The login page for all the users is made common
+- Artist Dashboard
+  ![](Pasted%20image%2020240420223946.png)
+- Manage Designs
+  ![](Pasted%20image%2020240420224009.png)
+- Upload Design
+  ![](Pasted%20image%2020240420224027.png)
+### Admin
+---
+- Dashboard
+  ![](Pasted%20image%2020240420224054.png)
+  ![](Pasted%20image%2020240420224117.png)
+  ![](Pasted%20image%2020240420224127.png)
+  ![](Pasted%20image%2020240420224135.png)
+  ![](Pasted%20image%2020240420224144.png)
+  ![](Pasted%20image%2020240420224151.png)
+  
+

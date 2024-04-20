@@ -37,12 +37,12 @@ def admin_view_artists():
             df = df.sort_values(by='Design Count')
         else:
             df = df.sort_values(by='Design Count', ascending=False)
-    elif sorting_param == 'Design Volume':
+    elif sorting_param == 'Total Sales':
         if order == 'Ascending':
             df = df.sort_values(by='Total Sales')
         else:
             df = df.sort_values(by='Total Sales', ascending=False)
-    elif sorting_param == 'Design Value':
+    elif sorting_param == 'Total Views':
         if order == 'Ascending':
             df = df.sort_values(by='Total Views')
         else:
@@ -148,7 +148,7 @@ def admin_view_products():
         'Total Sales': response['total_sales'],
         'Total Revenue': response['total_revenues']
     }
-    sorting_param = st.selectbox('Sort By', ['Product ID', 'Total Sales', 'Total Views'])
+    sorting_param = st.selectbox('Sort By', ['Product ID', 'Total Sales', 'Total Revenue'])
     order = st.selectbox('Order', ['Ascending', 'Descending'])
     df = pd.DataFrame(data)
     df.set_index('Product ID', inplace=True)
@@ -162,11 +162,11 @@ def admin_view_products():
             df = df.sort_values(by='Total Sales')
         else:
             df = df.sort_values(by='Total Sales', ascending=False)
-    elif sorting_param == 'Total Views':
+    elif sorting_param == 'Total Revenue':
         if order == 'Ascending':
-            df = df.sort_values(by='Total Views')
+            df = df.sort_values(by='Total Revenue')
         else:
-            df = df.sort_values(by='Total Views', ascending=False)
+            df = df.sort_values(by='Total Revenue', ascending=False)
     st.write(df)
 
 if __name__ == '__main__':

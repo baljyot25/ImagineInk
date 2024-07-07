@@ -1,4 +1,3 @@
-  ![](Report/Pasted%20image%2020240420224117.png)
 # Project ImaginInk
 ## Table of Contents
 ---
@@ -767,34 +766,35 @@ COMMIT;
 ## Workflows
 ---
 We have made a streamlitt application for the front-end of our project. It is a python library which provides tools for simple and easy to build user interfaces. The workflows of the different kinds of users are as follows along with their images.
+
 ### User
 ---
 - Login Page
-  ![](Pasted%20image%2020240420223729.png)
+  ![](Report/Pasted%20image%2020240420223729.png)
 - Home Page
-  ![](Pasted%20image%2020240420223800.png)
+  ![](Report/Pasted%20image%2020240420223800.png)
 - Products Page
-  ![](Pasted%20image%2020240420223841.png)
+  ![](Report/Pasted%20image%2020240420223841.png)
 - Cart
-  ![](Pasted%20image%2020240420223852.png)
+  ![](Report/Pasted%20image%2020240420223852.png)
 - Order History
-  ![](Pasted%20image%2020240420223909.png)
+  ![](Report/Pasted%20image%2020240420223909.png)
 ### Artist
 ---
 - The login page for all the users is made common
 - Artist Dashboard
-  ![](Pasted%20image%2020240420223946.png)
+  ![](Report/Pasted%20image%2020240420223946.png)
 - Manage Designs
-  ![](Pasted%20image%2020240420224009.png)
+  ![](Report/Pasted%20image%2020240420224009.png)
 - Upload Design
-  ![](Pasted%20image%2020240420224027.png)
+  ![](Report/Pasted%20image%2020240420224027.png)
 ### Admin
 ---
 - Dashboard
-  ![](Pasted%20image%2020240420224054.png)
-  ![](Report/Pasted%20image%2020240420224117.png)
-  ![](Pasted%20image%2020240420224127.png)
-  ![](Pasted%20image%2020240420224135.png)
-  ![](Pasted%20image%2020240420224144.png)
-  ![](Pasted%20image%2020240420224151.png)
+  ![](Report/Pasted%20image%2020240420224054.png)
+  ![](Report/Report/Pasted%20image%2020240420224117.png)
+  ![](Report/Pasted%20image%2020240420224127.png)
+  ![](Report/Pasted%20image%2020240420224135.png)
+  ![](Report/Pasted%20image%2020240420224144.png)
+  ![](Report/Pasted%20image%2020240420224151.png)
   

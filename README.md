@@ -1,6 +1,5 @@
 # Project ImaginInk
 ## Table of Contents
-![Report](Pasted%20image%2020240420224151.png)
 ---
 - [Project ImaginInk](#project-imaginink)
   - [Table of Contents](#table-of-contents)
@@ -796,5 +795,5 @@ We have made a streamlitt application for the front-end of our project. It is a 
   ![](Pasted%20image%2020240420224127.png)
   ![](Pasted%20image%2020240420224135.png)
   ![](Pasted%20image%2020240420224144.png)
-  ![Report](Pasted%20image%2020240420224151.png)
+  ![](Pasted%20image%2020240420224151.png)
   

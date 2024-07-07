@@ -1,3 +1,4 @@
+  ![](Report/Pasted%20image%2020240420224117.png)
 # Project ImaginInk
 ## Table of Contents
 ---
@@ -791,7 +792,7 @@ We have made a streamlitt application for the front-end of our project. It is a 
 ---
 - Dashboard
   ![](Pasted%20image%2020240420224054.png)
-  ![](Pasted%20image%2020240420224117.png)
+  ![](Report/Pasted%20image%2020240420224117.png)
   ![](Pasted%20image%2020240420224127.png)
   ![](Pasted%20image%2020240420224135.png)
   ![](Pasted%20image%2020240420224144.png)
